@@ -51,7 +51,7 @@ let API_KEY =
       const map = new mapboxgl.Map({
         container: 'mapContainer',
         style: 'mapbox://styles/mapbox/streets-v12',
-        center: [40.833251, -73.855608],
+        center: [-73.855608, 40.833251],
         zoom: 11.15
       });
 
