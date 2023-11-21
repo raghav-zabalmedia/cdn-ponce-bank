@@ -49,7 +49,7 @@ let API_KEY =
 
 
       const map = new mapboxgl.Map({
-        container: 'map',
+        container: 'mapContainer',
         style: 'mapbox://styles/mapbox/streets-v12',
         center: [0, 0],
         zoom: 11.15
