@@ -52,7 +52,7 @@ let API_KEY =
         container: 'mapContainer',
         style: 'mapbox://styles/mapbox/streets-v12',
         center: [-73.855608, 40.833251],
-        zoom: 11.15
+        zoom: 14
       });
 
       const geolocate = new mapboxgl.GeolocateControl({
