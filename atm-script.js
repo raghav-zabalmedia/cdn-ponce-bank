@@ -2,7 +2,7 @@ let API_KEY =
         "97bce941-0fcd-4547-b642-b0391a86e9b0a5f40b83-4852-4f00-805b-0486f6872a92";
       mapboxgl.accessToken = "pk.eyJ1IjoicG9uY2ViYW5rIiwiYSI6ImNsbnVkaXpvcjBhZ2kycm1maW44dDBpa2sifQ.Z64WawPBDYfTOj4NdUDIkw";
 
-      let data = new URLSearchParams();
+let data = new URLSearchParams();
 let ENDPOINT = "https://locatorapistaging.moneypass.com/Service.svc";
 const GET_ATM_URL = "/locations/atm";
 let lat, long;
@@ -547,8 +547,9 @@ async function loadMap() {
     el.id = `atm_popup_marker${feature.id}`;
     const htmlModalData = await getPopupModal(feature.id);
     const popup = await new mapboxgl.Popup({
-      closeOnClick: false,
+      closeButton: false,
       className: "atm_item--on-map atm-popup-outer-div",
+      offset: {'bottom': [0, -23]}
     }).setHTML(htmlModalData);
     popup._content.setAttribute("id", `atm_popup${feature.id}`);
     const marker = await new mapboxgl.Marker(el)
