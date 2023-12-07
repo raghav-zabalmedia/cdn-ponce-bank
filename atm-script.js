@@ -52,6 +52,9 @@ const map = new mapboxgl.Map({
   style: "mapbox://styles/mapbox/streets-v12",
   center: [-73.855608, 40.833251],
   zoom: 14,
+  scrollZoom      : false,
+  boxZoom         : false,
+  doubleClickZoom : false
 });
 
 const geolocate = new mapboxgl.GeolocateControl({
@@ -402,10 +405,10 @@ document
         }
       });
     }
-    $("#atmMain").slideToggle("slow");
+    // $("#atmMain").slideToggle("slow");
   });
 
-document
+  document
   .getElementById("wf-form-Filters")
   .addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -415,10 +418,10 @@ document
 const filterApply = document.getElementById("filterApply");
 filterApply?.setAttribute("type", "button");
 
+
 document
   .getElementById("filterApply")
   .addEventListener("click", async (event) => {
-    event.preventDefault();
     let serviceFilter = [];
     languages = Array.from(
       document.querySelectorAll("input[name=language]:checked")
@@ -449,8 +452,6 @@ document
     searchVal = "";
     document.getElementsByClassName("atm_search-field")[0].value = "";
     await handleHide(".simple-spinner");
-
-    return false;
   });
 
 document
@@ -567,18 +568,21 @@ async function loadMap() {
     const el = document.createElement("div");
     el.className = feature.className;
     el.id = `atm_popup_marker${feature.id}`;
+    el.setAttribute("dataId", feature.id);
     const htmlModalData = await getPopupModal(feature.id);
     const popup = await new mapboxgl.Popup({
       closeButton: false,
-      className: "atm_item--on-map atm-popup-outer-div",
-      offset: { bottom: [0, -23] },
+      className: "atm_marker-wr",
+      focusAfterOpen: false,
+      offset: {'bottom': [0, -23]}
     }).setHTML(htmlModalData);
     popup._content.setAttribute("id", `atm_popup${feature.id}`);
+    popup._content.setAttribute("class", `atm_item--on-map`);
     const marker = await new mapboxgl.Marker(el)
       .setLngLat(feature.geometry.coordinates)
       .setPopup(popup)
       .addTo(map);
-    marker.getPopup().on("open", () => {
+    marker.getPopup().on("open", async() => {
       document
         .querySelector(`#atm_popup${feature.id} .open-modal-details`)
         .addEventListener("click", function (e) {
@@ -589,18 +593,34 @@ async function loadMap() {
             .querySelector(".atm_detail")
             .classList.add("open");
           atmItem.closest(".atm_list-wr").classList.add("open-detail");
+          document.querySelector('.atm_show-trigger').click();
         });
+      document
+        .querySelector(`#atm_popup${feature.id} .close-marker-detail`)
+        .addEventListener("click", (event) => {
+          var currentAtmId = event.currentTarget.getAttribute("atm-id");
+          var atmItem = document.getElementById("atm_" + currentAtmId);
+            if (atmItem) {
+              atmItem
+                .closest(".atm_item")
+                .querySelector(".atm_detail")
+                .classList.remove("open");
+              atmItem.closest(".atm_list-wr").classList.remove("open-detail");
+              popup.remove();
+            }
+        });
+      await handleDirections();
     });
-    marker.getPopup().on("close", () => {
-      var atmItem = document.getElementById("atm_" + feature.id);
-      if (atmItem) {
-        atmItem
-          .closest(".atm_item")
-          .querySelector(".atm_detail")
-          .classList.remove("open");
-        atmItem.closest(".atm_list-wr").classList.remove("open-detail");
-      }
-    });
+    // marker.getPopup().on("close", () => {
+    //   var atmItem = document.getElementById("atm_" + feature.id);
+    //   if (atmItem) {
+    //     atmItem
+    //       .closest(".atm_item")
+    //       .querySelector(".atm_detail")
+    //       .classList.remove("open");
+    //     atmItem.closest(".atm_list-wr").classList.remove("open-detail");
+    //   }
+    // });
     marker.getElement().addEventListener("click", (e) => {
       if (map.getLayer("route")) {
         map.removeLayer("route");
@@ -608,11 +628,30 @@ async function loadMap() {
       if (map.getSource("route")) {
         map.removeSource("route");
       }
+      handleMarkerCss(e.target.getAttribute('dataId'))
+      // document.querySelector(`#atm_${e.target.getAttribute('dataId')}`).click();
       map.flyTo({
         center: marker.getLngLat(),
         zoom: 14,
       });
     });
+
+    // map.on('click', event => {
+    //   const target = event.originalEvent.target;
+    //   const markerWasClicked = marker.getElement().contains(target);
+    //   console.log("markerWasClicked", markerWasClicked)
+    //   marker.togglePopup();
+    // });
+    
+    document.querySelector(`#atm_popup_marker${feature.id}`).addEventListener('mouseover', (e) => {
+      e.stopImmediatePropagation();
+      e.stopPropagation();
+      e.preventDefault();
+      marker.getElement().click();
+      handleMarkerCss();
+      // popup.setLngLat(feature.geometry.coordinates).setHTML(htmlModalData).addTo(map);
+    });
+    
     /* marker
       .getElement()
       .addEventListener(
@@ -625,7 +664,7 @@ async function loadMap() {
         "mouseleave",
         () => (map.getCanvas().style.cursor = "")
       ); */
-    /*   document
+  /*   document
       .querySelector(`#atm_popup_marker${feature.id}`)
       .addEventListener("mouseleave", () => marker.togglePopup());
     document
@@ -694,8 +733,29 @@ async function getPopupModal(atmId) {
       ?.classList.add("hide");
   }
   atmClonePopupItem
+    .querySelector(`#atm_popup${atmLocation.id} .close-marker-detail`)
+    .setAttribute("atm-id", atmLocation.id);
+  
+  atmClonePopupItem
     .querySelector(`#atm_popup${atmLocation.id} .open-modal-details`)
     .setAttribute("atm-id", atmLocation.id);
+
+  var directionElement = atmClonePopupItem.querySelector(`#atm_popup${atmLocation.id} .atm-direction`);
+  if(directionElement){
+    directionElement.setAttribute("id", atmLocation.id),
+    directionElement.setAttribute(
+      "data-lat",
+      atmLocation.coordinates && atmLocation.coordinates.latitude
+        ? atmLocation.coordinates.latitude
+        : 0.0
+    ),
+    directionElement.setAttribute(
+      "data-long",
+      atmLocation.coordinates && atmLocation.coordinates.longitude
+        ? atmLocation.coordinates.longitude
+        : 0.0
+    );
+  }
   return atmClonePopupItem.innerHTML;
 }
 
@@ -715,48 +775,54 @@ async function fetchRoute(destinationLong, destinationLat) {
 }
 
 async function handleDirections() {
+  var checkLocationPermission = await checkGeoLocationPermission();
   document.querySelectorAll(".atm-direction").forEach((ele) => {
     ele.addEventListener("click", async (e) => {
-      e.preventDefault();
+      e.stopImmediatePropagation();
       e.stopPropagation();
-      if (map.getLayer("route")) {
-        map.removeLayer("route");
+      e.preventDefault();
+      if(checkLocationPermission){
+        if (map.getLayer("route")) {
+          map.removeLayer("route");
+        }
+        if (map.getSource("route")) {
+          map.removeSource("route");
+        }
+        var atm_id = e.currentTarget.getAttribute("id");
+        await handleMarkerClass(atm_id);
+        var destinationLong = e.currentTarget.getAttribute("data-long");
+        var destinationLat = e.currentTarget.getAttribute("data-lat");
+        var routeJson = await fetchRoute(destinationLong, destinationLat);
+        map.addSource(`route`, {
+          type: "geojson",
+          data: directionGeoJson,
+        });
+        map.addLayer({
+          id: `route`,
+          type: "line",
+          source: `route`,
+          layout: {
+            "line-join": "round",
+            "line-cap": "round",
+          },
+          paint: {
+            "line-color": "#1f4d6f",
+            "line-width": 4,
+          },
+        });
+        const coordinates = directionGeoJson.features[0].geometry.coordinates;
+        const bounds = new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]);
+        for (const coord of coordinates) {
+          bounds.extend(coord);
+        }
+        map.fitBounds(bounds, {
+          padding: 20,
+          linear: true,
+          maxZoom: 15,
+        });
+      }else{
+        alert("Unable to retrieve your location, please check your location permission!");
       }
-      if (map.getSource("route")) {
-        map.removeSource("route");
-      }
-      var atm_id = e.currentTarget.getAttribute("id");
-      await handleMarkerClass(atm_id);
-      var destinationLong = e.currentTarget.getAttribute("data-long");
-      var destinationLat = e.currentTarget.getAttribute("data-lat");
-      var routeJson = await fetchRoute(destinationLong, destinationLat);
-      map.addSource(`route`, {
-        type: "geojson",
-        data: directionGeoJson,
-      });
-      map.addLayer({
-        id: `route`,
-        type: "line",
-        source: `route`,
-        layout: {
-          "line-join": "round",
-          "line-cap": "round",
-        },
-        paint: {
-          "line-color": "#1f4d6f",
-          "line-width": 4,
-        },
-      });
-      const coordinates = directionGeoJson.features[0].geometry.coordinates;
-      const bounds = new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]);
-      for (const coord of coordinates) {
-        bounds.extend(coord);
-      }
-      map.fitBounds(bounds, {
-        padding: 20,
-        linear: true,
-        maxZoom: 15,
-      });
     });
   });
 }
@@ -783,4 +849,39 @@ async function handleMarkerClass(atmId) {
     geojson.features = filteredData;
   }
   await loadMap();
+}
+
+async function checkGeoLocationPermission(){
+  let isAllow = false;
+  if (navigator.geolocation) {
+    await navigator.geolocation.getCurrentPosition(
+      async function (position) {
+        isAllow = true;
+      },
+      async function (error) {
+        isAllow = false;
+      }
+      );
+    } else {
+    isAllow = false;
+  }
+  return isAllow;
+}
+
+async function handleMarkerCss(markerId){
+  if (markerId) {
+    await geojson.features.map((feature) => {
+      var markerEle = document.querySelector(`#atm_popup_marker${feature.id}`);
+      if (feature.id == markerId) {
+        markerEle.className = 'mapboxgl-marker mapboxgl-marker-anchor-centeratm_map_marker atm_map_marker atm_map_marker_selected';
+      } else {
+        markerEle.className = 'mapboxgl-marker mapboxgl-marker-anchor-centeratm_map_marker atm_map_marker';
+      }
+    });
+  } else {
+    await geojson.features.map((feature) => {
+      var markerEle = document.querySelector(`#atm_popup_marker${feature.id}`);
+      markerEle.className = 'atm_map_marker filtered mapboxgl-marker mapboxgl-marker-anchor-center';
+    });
+  }
 }
