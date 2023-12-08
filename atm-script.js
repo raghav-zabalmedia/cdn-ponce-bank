@@ -410,7 +410,7 @@ document
 
   document
   .getElementById("wf-form-Filters")
-  .addEventListener("submit", async (event) => {
+  .addEventListener("submit", (event) => {
     event.preventDefault();
     return false;
   });
@@ -420,14 +420,13 @@ filterApply?.setAttribute("type", "button");
 
 
 document
-  .getElementById("filterApply")
+  .querySelector("#filterApply")
   .addEventListener("click", async (event) => {
+    event.preventDefault();
     let serviceFilter = [];
     languages = Array.from(
-      document.querySelectorAll("input[name=language]:checked")
-    ).map((ele) => {
-      return ele.getAttribute("data-val");
-    });
+      document.querySelectorAll("input[name=language]")
+    ).filter((ele) => ele.checked).map((filtredData)  => filtredData.getAttribute("data-val"));
     document.getElementById("isAvailable24Hours").checked
       ? serviceFilter.push("isAvailable24Hours")
       : "";
@@ -442,7 +441,6 @@ document
     await handleHide("#atmList");
     await handleHide(".atm_list--empty");
     await handleShow(".simple-spinner");
-
     if (serviceFilter.length > 0 || languages.length > 0) {
       await handleServiceFilter(serviceFilter);
       await handleLanguageFilter(languages);
@@ -468,10 +466,12 @@ async function handleClearFilter() {
   await handleFilterCount();
   languages = [];
   document.querySelectorAll("input[type=checkbox]").forEach((ele) => {
-    ele.setAttribute("checked", false);
+    // ele.setAttribute("checked", false);
+    ele.checked = false;
     ele.previousElementSibling.classList.remove("w--redirected-checked");
   });
   totalFound = 0;
+  filterCount = 0;
   resObj = [];
   await data.set("start", totalFound);
   await data.delete("filter");
@@ -607,19 +607,21 @@ async function loadMap() {
                 .classList.remove("open");
               atmItem.closest(".atm_list-wr").classList.remove("open-detail");
               popup.remove();
+              handleAtmItemSelected();
             }
         });
       await handleDirections();
     });
     // marker.getPopup().on("close", () => {
-    //   var atmItem = document.getElementById("atm_" + feature.id);
-    //   if (atmItem) {
-    //     atmItem
-    //       .closest(".atm_item")
-    //       .querySelector(".atm_detail")
-    //       .classList.remove("open");
-    //     atmItem.closest(".atm_list-wr").classList.remove("open-detail");
-    //   }
+    //   handleAtmItemSelected();
+      // var atmItem = document.getElementById("atm_" + feature.id);
+      // if (atmItem) {
+      //   atmItem
+      //     .closest(".atm_item")
+      //     .querySelector(".atm_detail")
+      //     .classList.remove("open");
+      //   atmItem.closest(".atm_list-wr").classList.remove("open-detail");
+      // }
     // });
     marker.getElement().addEventListener("click", (e) => {
       if (map.getLayer("route")) {
@@ -629,7 +631,12 @@ async function loadMap() {
         map.removeSource("route");
       }
       handleMarkerCss(e.target.getAttribute('dataId'))
-      // document.querySelector(`#atm_${e.target.getAttribute('dataId')}`).click();
+      if(document.querySelector('.atm_hide-trigger').style.display == 'none'){
+        document.querySelector('.atm_show-trigger').click();
+      }
+      handleAtmItemSelected(e.target.getAttribute('dataId'));
+      var offsets = document.getElementById(`atm_${e.target.getAttribute('dataId')}`).offsetTop;
+      document.getElementById("atmMain").scroll({top:offsets,behavior:'smooth'});
       map.flyTo({
         center: marker.getLngLat(),
         zoom: 14,
@@ -649,6 +656,7 @@ async function loadMap() {
       e.preventDefault();
       marker.getElement().click();
       handleMarkerCss();
+      // handleAtmItemSelected();
       // popup.setLngLat(feature.geometry.coordinates).setHTML(htmlModalData).addTo(map);
     });
     
@@ -884,4 +892,21 @@ async function handleMarkerCss(markerId){
       markerEle.className = 'atm_map_marker filtered mapboxgl-marker mapboxgl-marker-anchor-center';
     });
   }
+}
+
+async function handleAtmItemSelected(atmID){
+  if(atmID){
+    document.querySelectorAll('.atm_item').forEach((ele) => {
+      if(ele.getAttribute('atm-id') == atmID){
+        ele.style.backgroundColor = '#f2f9ff';
+      }else{
+        ele.style = '';
+      }
+    });
+  }else{
+    document.querySelectorAll('.atm_item').forEach((ele) => {
+      ele.style = '';
+    });
+  }
+
 }
