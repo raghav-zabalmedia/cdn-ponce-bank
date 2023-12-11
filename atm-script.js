@@ -149,7 +149,7 @@ $(document).ready(async function () {
 
 let isScroll = false;
 let isRes = false;
-document.getElementById("atmMain").addEventListener("wheel", async (event) => {
+document.getElementById("atmMain").addEventListener("scroll", async (event) => {
   const postScroll = document.getElementById("atmMain");
   if (
     // totalFound < 50 &&
@@ -166,9 +166,9 @@ document.getElementById("atmMain").addEventListener("wheel", async (event) => {
       isScroll = true;
     }
     if (isScroll && !isRes) {
-      postScroll.scrollBy({
+      /*postScroll.scrollBy({
         top: event.deltaY < 0 ? -70 : 70,
-      });
+      });*/
       event.preventDefault();
       if (
         postScroll.scrollTop >=
