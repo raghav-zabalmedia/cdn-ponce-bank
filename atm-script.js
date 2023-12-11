@@ -150,39 +150,27 @@ $(document).ready(async function () {
 let isScroll = false;
 let isRes = false;
 document.getElementById("atmMain").addEventListener("scroll", async (event) => {
-  const postScroll = document.getElementById("atmMain");
   if (
     // totalFound < 50 &&
     totalFound > 0 &&
     searchVal == "" &&
     languages.length <= 0
   ) {
-    if (
-      (postScroll.scrollTop == 0 && !isScroll) ||
-      (!isScroll &&
-        postScroll.scrollTop ==
-          postScroll.scrollHeight - postScroll.clientHeight)
-    ) {
-      isScroll = true;
-    }
-    if (isScroll && !isRes) {
-      /*postScroll.scrollBy({
-        top: event.deltaY < 0 ? -70 : 70,
-      });*/
-      event.preventDefault();
-      if (
-        postScroll.scrollTop >=
-        postScroll.scrollHeight - postScroll.clientHeight
-      ) {
-        isScroll = false;
-        await data.set("start", totalFound + 1);
-        isRes = true;
-        const ATMData = await getATMData(data, GET_ATM_URL, ".bottom-spinner");
-        await handleResponse(ATMData);
-        isRes = false;
+    const scrollableElement = document.getElementById('atmMain');
+      const scrollTop = scrollableElement.scrollTop + 1;
+      const scrollHeight = scrollableElement.scrollHeight;
+      const clientHeight = scrollableElement.clientHeight;
+      if(scrollTop + clientHeight >= scrollHeight) {
+        isScroll = true;
       }
-    } else {
-      return true;
+
+    if (isScroll && !isRes) {
+      isScroll = false;
+      await data.set("start", totalFound + 1);
+      isRes = true;
+      const ATMData = await getATMData(data, GET_ATM_URL, ".bottom-spinner");
+      await handleResponse(ATMData);
+      isRes = false;
     }
   }
 });
