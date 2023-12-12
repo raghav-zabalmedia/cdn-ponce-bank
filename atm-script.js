@@ -214,7 +214,7 @@ document.getElementById("atmMain").addEventListener("scroll", async (event) => {
 });
 
 async function getATMData(data, GET_ATM_URL, spinnerCls) {
-  await handleShow(spinnerCls);  
+  await handleShow(spinnerCls);
   const response = await fetch(ENDPOINT + GET_ATM_URL + "?" + data.toString())
     .then((response) => response.json())
     .then((data) => data)
@@ -222,12 +222,14 @@ async function getATMData(data, GET_ATM_URL, spinnerCls) {
   return response;
 }
 
-async function getCSVData(){
+async function getCSVData() {
   const csvFileResponse = await readCsv();
   var parsedData = await csvParser(csvFileResponse);
-  if(parsedData.length > 0){
-    parsedData = await parsedData.filter((parsedObj) => parsedObj.distance >= min && parsedObj.distance <= max);
-    if(parsedData.length > 0){
+  if (parsedData.length > 0) {
+    parsedData = await parsedData.filter(
+      (parsedObj) => parsedObj.distance >= min && parsedObj.distance <= max
+    );
+    if (parsedData.length > 0) {
       //check service filter applied or not
       var serviceFilterData = data.get("filter")
         ? data.get("filter").split("&&")
@@ -285,64 +287,66 @@ async function csvParser(csvData) {
     const values = line.split(",");
     let csvImportCloneObj = JSON.parse(JSON.stringify(csvImportObj));
     if (values[0] !== undefined && values.length > 1) {
-      
-        csvImportCloneObj.atmLocation.name =
-          values[0] !== null && values[0] !== "" ? values[0] : "";
-        csvImportCloneObj.atmLocation.address.street =
-          values[1] !== null && values[1] !== "" ? values[1] : "";
-        csvImportCloneObj.atmLocation.address.city =
-          values[2] !== null && values[2] !== "" ? values[2] : "";
-        csvImportCloneObj.atmLocation.address.state =
-          values[3] !== null && values[3] !== "" ? values[3] : "";
-        csvImportCloneObj.atmLocation.address.postalCode =
-          values[4] !== null && values[4] !== "" ? values[4] : "";
-        csvImportCloneObj.atmLocation.coordinates.latitude =
-          values[5] !== null && values[5] !== "" ? values[5] : "";
-        csvImportCloneObj.atmLocation.coordinates.longitude =
-          values[6] !== null && values[6] !== "" ? values[6] : "";
-        csvImportCloneObj.atmLocation.isAvailable24Hours =
-          values[7] !== null && values[7] !== ""
-            ? await stringToBoolean(values[7])
-            : false;
-        csvImportCloneObj.atmLocation.isDepositAvailable =
-          values[8] !== null && values[8] !== ""
-            ? await stringToBoolean(values[8])
-            : false;
-        csvImportCloneObj.atmLocation.isCashDepositAvailable =
-          values[9] !== null && values[9] !== ""
-            ? await stringToBoolean(values[9])
-            : false;
-        csvImportCloneObj.atmLocation.isHandicappedAccessible =
-          values[10] !== null && values[10] !== ""
-            ? await stringToBoolean(values[10])
-            : false;
-        csvImportCloneObj.atmLocation.languageType =
-          values[11] !== null && values[11] !== "" ? values[11] : "";
-        csvImportCloneObj.distance = null;
-        csvImportCloneObj.type = "csv";
+      csvImportCloneObj.atmLocation.name =
+        values[0] !== null && values[0] !== "" ? values[0] : "";
+      csvImportCloneObj.atmLocation.address.street =
+        values[1] !== null && values[1] !== "" ? values[1] : "";
+      csvImportCloneObj.atmLocation.address.city =
+        values[2] !== null && values[2] !== "" ? values[2] : "";
+      csvImportCloneObj.atmLocation.address.state =
+        values[3] !== null && values[3] !== "" ? values[3] : "";
+      csvImportCloneObj.atmLocation.address.postalCode =
+        values[4] !== null && values[4] !== "" ? values[4] : "";
+      csvImportCloneObj.atmLocation.coordinates.latitude =
+        values[5] !== null && values[5] !== "" ? values[5] : "";
+      csvImportCloneObj.atmLocation.coordinates.longitude =
+        values[6] !== null && values[6] !== "" ? values[6] : "";
+      csvImportCloneObj.atmLocation.isAvailable24Hours =
+        values[7] !== null && values[7] !== ""
+          ? await stringToBoolean(values[7])
+          : false;
+      csvImportCloneObj.atmLocation.isDepositAvailable =
+        values[8] !== null && values[8] !== ""
+          ? await stringToBoolean(values[8])
+          : false;
+      csvImportCloneObj.atmLocation.isCashDepositAvailable =
+        values[9] !== null && values[9] !== ""
+          ? await stringToBoolean(values[9])
+          : false;
+      csvImportCloneObj.atmLocation.isHandicappedAccessible =
+        values[10] !== null && values[10] !== ""
+          ? await stringToBoolean(values[10])
+          : false;
+      csvImportCloneObj.atmLocation.languageType =
+        values[11] !== null && values[11] !== "" ? values[11] : "";
+      csvImportCloneObj.distance = null;
+      csvImportCloneObj.type = "csv";
 
-        if (
-          csvImportCloneObj.atmLocation.coordinates.latitude != "" &&
-          csvImportCloneObj.atmLocation.coordinates.longitude != ""
-        ) {
-          let distance = await calculateDistance(
-            csvImportCloneObj.atmLocation.coordinates.latitude * 1,
-            csvImportCloneObj.atmLocation.coordinates.longitude * 1,
-            lat,
-            long
-          );
-          csvImportCloneObj.distance = distance.toFixed(2) * 1;
-        }
+      if (
+        csvImportCloneObj.atmLocation.coordinates.latitude != "" &&
+        csvImportCloneObj.atmLocation.coordinates.longitude != ""
+      ) {
+        let distance = await calculateDistance(
+          csvImportCloneObj.atmLocation.coordinates.latitude * 1,
+          csvImportCloneObj.atmLocation.coordinates.longitude * 1,
+          lat,
+          long
+        );
+        csvImportCloneObj.distance = distance.toFixed(2) * 1;
+      }
 
-        csvImportCloneObj.atmLocation.id = await uid();
-      
+      csvImportCloneObj.atmLocation.id = await uid();
+
       // if (
       //   csvImportCloneObj.distance !== null &&
       //   csvImportCloneObj.distance <= 100
       // ) {
-        if(csvImportCloneObj.atmLocation.coordinates.latitude && csvImportCloneObj.atmLocation.coordinates.longitude){
-          rows.push(csvImportCloneObj);
-        }
+      if (
+        csvImportCloneObj.atmLocation.coordinates.latitude &&
+        csvImportCloneObj.atmLocation.coordinates.longitude
+      ) {
+        rows.push(csvImportCloneObj);
+      }
       // }
     }
   }
@@ -356,18 +360,27 @@ async function handleResponse(response) {
     response.results !== null &&
     response.results.length > 0
   ) {
-    resObj.length > 0
-      ? response.results.map((res) => resObj.push(res))
-      : (resObj = response.results);
-
-      if(response.results.length > 0){
-        min = await Math.min(...response.results.map(item => item.distance)).toFixed(2);
-        max = await Math.max(...response.results.map(item => item.distance)).toFixed(2);
+    if (resObj.length > 0) {
+      response.results.map((res) => resObj.push(res));
+      if (response.results.length > 0) {
+        min = await Math.min(
+          ...response.results.map((item) => item.distance)
+        ).toFixed(2);
       }
+    } else {
+      resObj = response.results;
+      min = 0;
+    }
+
+    if (response.results.length > 0) {
+      max = await Math.max(
+        ...response.results.map((item) => item.distance)
+      ).toFixed(2);
+    }
   } else {
     max = 100;
   }
- 
+
   if (excelUrl) {
     await getCSVData();
   }
@@ -468,7 +481,9 @@ async function getATMDiv(cloneObj) {
     .forEach((ele) => {
       ele.innerText = atmLocation.locationDescription
         ? atmLocation.locationDescription
-        :  cloneObj.type === 'csv'?`${atmLocation.address.street} , ${atmLocation.address.city} , ${atmLocation.address.state}, ${atmLocation.address.postalCode}`:"";
+        : cloneObj.type === "csv"
+        ? `${atmLocation.address.street} , ${atmLocation.address.city} , ${atmLocation.address.state}, ${atmLocation.address.postalCode}`
+        : "";
     });
   atmCloneItem
     .querySelectorAll(`#atm_${atmLocation.id} .atm-direction`)
@@ -746,7 +761,9 @@ async function handleMapData(resObject) {
         cloneMapObj.properties.description =
           obj.atmLocation && obj.atmLocation.locationDescription
             ? obj.atmLocation.locationDescription
-            : obj.type === 'csv'?`${obj.atmLocation.address.street} , ${obj.atmLocation.address.city} , ${obj.atmLocation.address.state}, ${obj.atmLocation.address.postalCode}`:"";
+            : obj.type === "csv"
+            ? `${obj.atmLocation.address.street} , ${obj.atmLocation.address.city} , ${obj.atmLocation.address.state}, ${obj.atmLocation.address.postalCode}`
+            : "";
         cloneMapObj.id = obj.atmLocation.id;
         await geojson.features.push(cloneMapObj);
       })
@@ -757,11 +774,10 @@ async function handleMapData(resObject) {
   await loadMap();
 }
 
-
-const targetDiv = document.querySelector('.atm_page')
-document.addEventListener('click', (e) => {
+const targetDiv = document.querySelector(".atm_page");
+document.addEventListener("click", (e) => {
   // e.preventDefault();
-  const isClickedInsideDiv = e.composedPath().includes(targetDiv)
+  const isClickedInsideDiv = e.composedPath().includes(targetDiv);
   if (!isClickedInsideDiv) {
     handleAtmItemSelected();
     handleMarkerCss();
@@ -771,10 +787,10 @@ document.addEventListener('click', (e) => {
     if (map.getSource("route")) {
       map.removeSource("route");
     }
-  }else{
+  } else {
     return true;
   }
-})
+});
 
 async function loadMap() {
   await clearMarkers();
@@ -825,13 +841,13 @@ async function loadMap() {
             handleMarkerCss();
           }
         });
-      document.addEventListener('click', (e) => {
+      document.addEventListener("click", (e) => {
         // e.preventDefault();
-        const targetDiv = document.querySelector('.atm_page')
-        const isClickedInsideDiv = e.composedPath().includes(targetDiv)
+        const targetDiv = document.querySelector(".atm_page");
+        const isClickedInsideDiv = e.composedPath().includes(targetDiv);
         if (!isClickedInsideDiv) {
           popup.remove();
-        }else{
+        } else {
           return true;
         }
       });
@@ -839,8 +855,8 @@ async function loadMap() {
     });
     // marker.getPopup().on("close", () => {
     //   console.log("test");
-      // handleAtmItemSelected();
-      // handleMarkerCss();
+    // handleAtmItemSelected();
+    // handleMarkerCss();
     // var atmItem = document.getElementById("atm_" + feature.id);
     // if (atmItem) {
     //   atmItem
@@ -1212,4 +1228,5 @@ async function calculateDistance(lat1, lon1, lat2, lon2, unit) {
 async function uid() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
+
 
