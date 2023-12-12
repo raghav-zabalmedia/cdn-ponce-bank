@@ -10,7 +10,7 @@ let ENDPOINT = "https://locatorapistaging.moneypass.com/Service.svc";
 const GET_ATM_URL = "/locations/atm";
 let lat, long;
 let page = 1;
-let count = 100;
+let count = 500;
 let radius = 100;
 let resObj = [];
 let totalFound = 0;
