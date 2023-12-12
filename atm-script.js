@@ -624,7 +624,7 @@ document
   .addEventListener("click", async (event) => {
     event.preventDefault();
     let serviceFilter = [];
-    languages = Array.from(document.querySelectorAll("input[name=language]"))
+    languages = Array.from(document.querySelectorAll("input.language-filter"))
       .filter((ele) => ele.checked)
       .map((filtredData) => filtredData.getAttribute("data-val"));
     document.getElementById("isAvailable24Hours").checked
