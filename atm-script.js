@@ -10,7 +10,7 @@ let ENDPOINT = "https://locatorapistaging.moneypass.com/Service.svc";
 const GET_ATM_URL = "/locations/atm";
 let lat, long;
 let page = 1;
-let count = 10;
+let count = 100;
 let radius = 100;
 let resObj = [];
 let totalFound = 0;
@@ -40,33 +40,33 @@ const geojson = {
   features: [],
 };
 const csvImportObj = {
-  "atmLocation": {
-      "address": {
-          "city": "",
-          "country": "",
-          "postalCode": "",
-          "state": "",
-          "street": ""
-      },
-      "coordinates": {
-          "latitude": 0,
-          "longitude": 0
-      },
-      "id": "",
-      "name": "",
-      "isAvailable24Hours": false,
-      "isDepositAvailable": false,
-      "isCashDepositAvailable": false,
-      "isHandicappedAccessible": false,
-      "isOffPremise": false,
-      "isSeasonal": false,
-      "languageType": "",
-      "locationDescription": "",
-      "logoName": "",
-      "terminalId": "",
-      "participantId": ""
+  atmLocation: {
+    address: {
+      city: "",
+      country: "",
+      postalCode: "",
+      state: "",
+      street: "",
+    },
+    coordinates: {
+      latitude: 0,
+      longitude: 0,
+    },
+    id: "",
+    name: "",
+    isAvailable24Hours: false,
+    isDepositAvailable: false,
+    isCashDepositAvailable: false,
+    isHandicappedAccessible: false,
+    isOffPremise: false,
+    isSeasonal: false,
+    languageType: "",
+    locationDescription: "",
+    logoName: "",
+    terminalId: "",
+    participantId: "",
   },
-  "distance": 0.00
+  distance: 0.0,
 };
 
 const directionGeoJson = {
@@ -192,13 +192,13 @@ document.getElementById("atmMain").addEventListener("scroll", async (event) => {
     searchVal == "" &&
     languages.length <= 0
   ) {
-    const scrollableElement = document.getElementById('atmMain');
-      const scrollTop = scrollableElement.scrollTop + 1;
-      const scrollHeight = scrollableElement.scrollHeight;
-      const clientHeight = scrollableElement.clientHeight;
-      if(scrollTop + clientHeight >= scrollHeight) {
-        isScroll = true;
-      }
+    const scrollableElement = document.getElementById("atmMain");
+    const scrollTop = scrollableElement.scrollTop + 1;
+    const scrollHeight = scrollableElement.scrollHeight;
+    const clientHeight = scrollableElement.clientHeight;
+    if (scrollTop + clientHeight >= scrollHeight) {
+      isScroll = true;
+    }
 
     if (isScroll && !isRes) {
       isScroll = false;
@@ -215,56 +215,73 @@ async function getATMData(data, GET_ATM_URL, spinnerCls) {
   await handleShow(spinnerCls);
   // console.log(count, csvStartPosition, csvEndPosition)
   //fetch csv Data
-  if(excelUrl){
+  if (excelUrl) {
     const csvFileResponse = await readCsv();
-    if(csvFileResponse){
+    if (csvFileResponse) {
       csvData = await csvParser(csvFileResponse);
       //if service filter found
-      var serviceFilterData = data.get('filter')?data.get('filter').split('&&'):[];
-      if(serviceFilterData.length > 0){
-        var filteredServiceCSV =  [];
-        await serviceFilterData.forEach(async(service) => {
-          var serviceFilterArray = await csvData.filter((csv) => csv.atmLocation[`${service}`]).map((filtredData) => filtredData)
+      var serviceFilterData = data.get("filter")
+        ? data.get("filter").split("&&")
+        : [];
+      if (serviceFilterData.length > 0) {
+        var filteredServiceCSV = [];
+        await serviceFilterData.forEach(async (service) => {
+          var serviceFilterArray = await csvData
+            .filter((csv) => csv.atmLocation[`${service}`])
+            .map((filtredData) => filtredData);
           // console.log("testdata", serviceFilterArray)
-          if(serviceFilterArray.length > 0 &&  serviceFilterArray[0] != undefined){
+          if (
+            serviceFilterArray.length > 0 &&
+            serviceFilterArray[0] != undefined
+          ) {
             serviceFilterArray.map(async (data) => {
               // console.log("data", data.atmLocation.id)
-              filteredServiceCSV.push(data)
-            })
+              filteredServiceCSV.push(data);
+            });
           }
-        })
+        });
         // console.log("filteredServiceCSV", filteredServiceCSV)
-        csvData = filteredServiceCSV.filter((a, i) => a != undefined && filteredServiceCSV.findIndex((s) => a.atmLocation.id === s.atmLocation.id) === i)
+        csvData = filteredServiceCSV.filter(
+          (a, i) =>
+            a != undefined &&
+            filteredServiceCSV.findIndex(
+              (s) => a.atmLocation.id === s.atmLocation.id
+            ) === i
+        );
       }
     }
-    csvData = csvData.slice(csvStartPosition, csvStartPosition == 0 ?csvEndPosition+1:csvEndPosition);
+    csvData = csvData.slice(
+      csvStartPosition,
+      csvStartPosition == 0 ? csvEndPosition + 1 : csvEndPosition
+    );
     // console.log("csvData", csvData)
-    if(csvData.length > 0){
-      if(csvData.length <= 5){
-        if(csvStartPosition == 0){
+    if (csvData.length > 0) {
+      if (csvData.length <= 5) {
+        if (csvStartPosition == 0) {
           count = count - csvData.length;
           csvEndPosition = csvData.length;
-        }else{
+        } else {
           // console.log("csvData.length", csvData.length)
           count = 10;
           count = count - csvData.length;
-          if(totalFound == 0){
+          if (totalFound == 0) {
             csvStartPosition = 0;
             csvEndPosition = 10;
           }
         }
-      }else{
+      } else {
         count = 5;
-        csvEndPosition = csvStartPosition == 0 ?5:csvEndPosition;
+        csvEndPosition = csvStartPosition == 0 ? 5 : csvEndPosition;
       }
       // console.log(count, csvStartPosition, csvEndPosition)
-      
-      if(csvData.length > 0){
+
+      if (csvData.length > 0) {
         await Promise.all(csvData.map((csvSlice) => resObj.push(csvSlice)));
-        csvStartPosition = csvStartPosition == 0?csvEndPosition:csvEndPosition + 1;
+        csvStartPosition =
+          csvStartPosition == 0 ? csvEndPosition : csvEndPosition + 1;
         csvEndPosition += 4;
       }
-    }else{
+    } else {
       count = 10;
     }
     // console.log(count, csvStartPosition, csvEndPosition)
@@ -295,39 +312,80 @@ async function csvParser(csvData) {
   const text = csvData.split(/\r\n|\n/);
   const [first, ...lines] = text;
   const headers = first.split(",");
-  var latIndex = headers.findIndex((headerName) => headerName == 'latitude');
-  var longIndex = headers.findIndex((headerName) => headerName == 'longitude');
   const rows = [];
 
-  await Promise.all(lines.map(async (line) => {
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index];
     const values = line.split(",");
     let csvImportCloneObj = JSON.parse(JSON.stringify(csvImportObj));
-    if(values[0] !== undefined && values.length > 1) {
-      new Promise(async function(resolve, reject) {
-        csvImportCloneObj.atmLocation.name = values[0] !== null && values[0] !== '' ? values[0] : '';
-        csvImportCloneObj.atmLocation.address.street = values[1] !== null && values[1] !== '' ? values[1] : '';
-        csvImportCloneObj.atmLocation.address.city = values[2] !== null && values[2] !== '' ? values[2] : '';
-        csvImportCloneObj.atmLocation.address.state = values[3] !== null && values[3] !== '' ? values[3] : '';
-        csvImportCloneObj.atmLocation.address.postalCode = values[4] !== null && values[4] !== '' ? values[4] : '';
-        csvImportCloneObj.atmLocation.coordinates.latitude = values[5] !== null && values[5] !== '' ? values[5] : '';
-        csvImportCloneObj.atmLocation.coordinates.longitude = values[6] !== null && values[6] !== '' ? values[6] : '';
-        csvImportCloneObj.atmLocation.isAvailable24Hours = values[7] !== null && values[7] !== '' ? await stringToBoolean(values[7]) : false;
-        csvImportCloneObj.atmLocation.isDepositAvailable = values[8] !== null && values[8] !== '' ? await stringToBoolean(values[8]) : false;
-        csvImportCloneObj.atmLocation.isCashDepositAvailable = values[9] !== null && values[9] !== '' ? await stringToBoolean(values[9]) : false;
-        csvImportCloneObj.atmLocation.isHandicappedAccessible = values[10] !== null && values[10] !== '' ? await stringToBoolean(values[10]) : false;
-        csvImportCloneObj.atmLocation.languageType = values[11] !== null && values[11] !== '' ? values[11] : '';
-        csvImportCloneObj.distance = '';
-        csvImportCloneObj.type = 'csv';
-        if(csvImportCloneObj.atmLocation.coordinates.latitude != '' && csvImportCloneObj.atmLocation.coordinates.longitude) {
-          let distance = await calculateDistance((values[latIndex] * 1),(values[longIndex] * 1), lat, long);
-          csvImportCloneObj.distance = (distance.toFixed(2) * 1);
-          csvImportCloneObj.atmLocation.id = await uid();
+    if (values[0] !== undefined && values.length > 1) {
+      
+        csvImportCloneObj.atmLocation.name =
+          values[0] !== null && values[0] !== "" ? values[0] : "";
+        csvImportCloneObj.atmLocation.address.street =
+          values[1] !== null && values[1] !== "" ? values[1] : "";
+        csvImportCloneObj.atmLocation.address.city =
+          values[2] !== null && values[2] !== "" ? values[2] : "";
+        csvImportCloneObj.atmLocation.address.state =
+          values[3] !== null && values[3] !== "" ? values[3] : "";
+        csvImportCloneObj.atmLocation.address.postalCode =
+          values[4] !== null && values[4] !== "" ? values[4] : "";
+        csvImportCloneObj.atmLocation.coordinates.latitude =
+          values[5] !== null && values[5] !== "" ? values[5] : "";
+        csvImportCloneObj.atmLocation.coordinates.longitude =
+          values[6] !== null && values[6] !== "" ? values[6] : "";
+        csvImportCloneObj.atmLocation.isAvailable24Hours =
+          values[7] !== null && values[7] !== ""
+            ? await stringToBoolean(values[7])
+            : false;
+        csvImportCloneObj.atmLocation.isDepositAvailable =
+          values[8] !== null && values[8] !== ""
+            ? await stringToBoolean(values[8])
+            : false;
+        csvImportCloneObj.atmLocation.isCashDepositAvailable =
+          values[9] !== null && values[9] !== ""
+            ? await stringToBoolean(values[9])
+            : false;
+        csvImportCloneObj.atmLocation.isHandicappedAccessible =
+          values[10] !== null && values[10] !== ""
+            ? await stringToBoolean(values[10])
+            : false;
+        csvImportCloneObj.atmLocation.languageType =
+          values[11] !== null && values[11] !== "" ? values[11] : "";
+        csvImportCloneObj.distance = null;
+        csvImportCloneObj.type = "csv";
+
+        if (
+          csvImportCloneObj.atmLocation.coordinates.latitude != "" &&
+          csvImportCloneObj.atmLocation.coordinates.longitude
+        ) {
+          let distance = await calculateDistance(
+            csvImportCloneObj.atmLocation.coordinates.latitude * 1,
+            csvImportCloneObj.atmLocation.coordinates.longitude * 1,
+            lat,
+            long
+          );
+          console.log("distance", distance);
+          csvImportCloneObj.distance = distance.toFixed(2) * 1;
         }
-        resolve(csvImportCloneObj);
-      });
-      rows.push(csvImportCloneObj);
+
+        csvImportCloneObj.atmLocation.id = await uid();
+      
+      console.log(
+        "csvImportCloneObj.distance",
+        csvImportCloneObj.atmLocation.coordinates.latitude,
+        csvImportCloneObj.distance
+      );
+      if (
+        csvImportCloneObj.distance !== null &&
+        csvImportCloneObj.distance <= 100
+      ) {
+        rows.push(csvImportCloneObj);
+      }
     }
-  }));
+  }
+
+  console.log("rows", rows);
   return rows;
 }
 
@@ -345,9 +403,9 @@ async function handleResponse(response) {
   }
   switch (status) {
     case "fail":
-      if(resObj.length > 0){
+      if (resObj.length > 0) {
         await mapATMData(resObj);
-      }else{
+      } else {
         await handleShow(".atm_list--empty");
         await handleHide("#atmList");
         await handleHide(".bottom-spinner");
@@ -358,18 +416,18 @@ async function handleResponse(response) {
       await mapATMData(resObj);
       break;
     case "error":
-      if(resObj.length > 0){
+      if (resObj.length > 0) {
         await mapATMData(resObj);
-      }else{
+      } else {
         await handleShow(".atm_list--empty");
         await handleHide("#atmList");
         await handleHide(".bottom-spinner");
       }
       break;
     default:
-      if(resObj.length > 0){
+      if (resObj.length > 0) {
         await mapATMData(resObj);
-      }else{
+      } else {
         await handleShow(".atm_list--empty");
         await handleHide("#atmList");
         await handleHide(".bottom-spinner");
@@ -1091,46 +1149,51 @@ async function handleAtmItemSelected(atmID) {
 }
 
 async function stringToBoolean(stringValue) {
-  switch(stringValue?.toLowerCase()?.trim()){
-      case "true": 
-      case "yes": 
-      case "1": 
-        return true;
-  
-      case "false": 
-      case "no": 
-      case "0": 
-      case null: 
-      case undefined:
-        return false;
-  
-      default: 
-        return false;
+  switch (stringValue?.toLowerCase()?.trim()) {
+    case "true":
+    case "yes":
+    case "1":
+      return true;
+
+    case "false":
+    case "no":
+    case "0":
+    case null:
+    case undefined:
+      return false;
+
+    default:
+      return false;
   }
 }
 
 async function calculateDistance(lat1, lon1, lat2, lon2, unit) {
-  if ((lat1 == lat2) && (lon1 == lon2)) {
+  if (lat1 == lat2 && lon1 == lon2) {
     return 0;
-  }
-  else {
-    var radlat1 = Math.PI * lat1/180;
-    var radlat2 = Math.PI * lat2/180;
-    var theta = lon1-lon2;
-    var radtheta = Math.PI * theta/180;
-    var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+  } else {
+    var radlat1 = (Math.PI * lat1) / 180;
+    var radlat2 = (Math.PI * lat2) / 180;
+    var theta = lon1 - lon2;
+    var radtheta = (Math.PI * theta) / 180;
+    var dist =
+      Math.sin(radlat1) * Math.sin(radlat2) +
+      Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
     if (dist > 1) {
-        dist = 1;
+      dist = 1;
     }
     dist = Math.acos(dist);
-    dist = dist * 180/Math.PI;
+    dist = (dist * 180) / Math.PI;
     dist = dist * 60 * 1.1515;
-    if (unit=="K") { dist = dist * 1.609344 }
-    if (unit=="N") { dist = dist * 0.8684 }
+    if (unit == "K") {
+      dist = dist * 1.609344;
+    }
+    if (unit == "N") {
+      dist = dist * 0.8684;
+    }
     return dist;
   }
 }
 
-async function uid(){
+async function uid() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
