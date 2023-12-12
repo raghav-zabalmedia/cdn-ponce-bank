@@ -10,7 +10,7 @@ let ENDPOINT = "https://locatorapistaging.moneypass.com/Service.svc";
 const GET_ATM_URL = "/locations/atm";
 let lat, long;
 let page = 1;
-let count = 50;
+let count = 10;
 let radius = 100;
 let resObj = [];
 let totalFound = 0;
@@ -21,6 +21,8 @@ var markers = [];
 let csvData = [];
 let csvStartPosition = 0;
 let csvEndPosition = 4;
+let min = 0;
+let max = 5;
 
 const geoCloneObj = {
   type: "Feature",
@@ -212,36 +214,40 @@ document.getElementById("atmMain").addEventListener("scroll", async (event) => {
 });
 
 async function getATMData(data, GET_ATM_URL, spinnerCls) {
-  await handleShow(spinnerCls);
-  // console.log(count, csvStartPosition, csvEndPosition)
-  //fetch csv Data
-  if (excelUrl) {
-    const csvFileResponse = await readCsv();
-    if (csvFileResponse) {
-      csvData = await csvParser(csvFileResponse);
-      //if service filter found
+  await handleShow(spinnerCls);  
+  const response = await fetch(ENDPOINT + GET_ATM_URL + "?" + data.toString())
+    .then((response) => response.json())
+    .then((data) => data)
+    .catch((error) => error);
+  return response;
+}
+
+async function getCSVData(){
+  const csvFileResponse = await readCsv();
+  var parsedData = await csvParser(csvFileResponse);
+  if(parsedData.length > 0){
+    parsedData = await parsedData.filter((parsedObj) => parsedObj.distance >= min && parsedObj.distance <= max);
+    if(parsedData.length > 0){
+      //check service filter applied or not
       var serviceFilterData = data.get("filter")
         ? data.get("filter").split("&&")
         : [];
       if (serviceFilterData.length > 0) {
         var filteredServiceCSV = [];
         await serviceFilterData.forEach(async (service) => {
-          var serviceFilterArray = await csvData
+          var serviceFilterArray = await parsedData
             .filter((csv) => csv.atmLocation[`${service}`])
             .map((filtredData) => filtredData);
-          // console.log("testdata", serviceFilterArray)
           if (
             serviceFilterArray.length > 0 &&
             serviceFilterArray[0] != undefined
           ) {
             serviceFilterArray.map(async (data) => {
-              // console.log("data", data.atmLocation.id)
               filteredServiceCSV.push(data);
             });
           }
         });
-        // console.log("filteredServiceCSV", filteredServiceCSV)
-        csvData = filteredServiceCSV.filter(
+        parsedData = filteredServiceCSV.filter(
           (a, i) =>
             a != undefined &&
             filteredServiceCSV.findIndex(
@@ -249,49 +255,10 @@ async function getATMData(data, GET_ATM_URL, spinnerCls) {
             ) === i
         );
       }
+      await Promise.all(parsedData.map((csvSlice) => resObj.push(csvSlice)));
     }
-    csvData = csvData.slice(
-      csvStartPosition,
-      csvStartPosition == 0 ? csvEndPosition + 1 : csvEndPosition
-    );
-    // console.log("csvData", csvData)
-    if (csvData.length > 0) {
-      if (csvData.length <= 5) {
-        if (csvStartPosition == 0) {
-          count = count - csvData.length;
-          csvEndPosition = csvData.length;
-        } else {
-          // console.log("csvData.length", csvData.length)
-          count = 10;
-          count = count - csvData.length;
-          if (totalFound == 0) {
-            csvStartPosition = 0;
-            csvEndPosition = 10;
-          }
-        }
-      } else {
-        count = 5;
-        csvEndPosition = csvStartPosition == 0 ? 5 : csvEndPosition;
-      }
-      // console.log(count, csvStartPosition, csvEndPosition)
-
-      if (csvData.length > 0) {
-        await Promise.all(csvData.map((csvSlice) => resObj.push(csvSlice)));
-        csvStartPosition =
-          csvStartPosition == 0 ? csvEndPosition : csvEndPosition + 1;
-        csvEndPosition += 4;
-      }
-    } else {
-      count = 10;
-    }
-    // console.log(count, csvStartPosition, csvEndPosition)
-    data.set("count", count);
   }
-  const response = await fetch(ENDPOINT + GET_ATM_URL + "?" + data.toString())
-    .then((response) => response.json())
-    .then((data) => data)
-    .catch((error) => error);
-  return response;
+  return true;
 }
 
 async function readCsv() {
@@ -308,7 +275,6 @@ async function readCsv() {
 }
 
 async function csvParser(csvData) {
-  // console.log('csvData', csvData)
   const text = csvData.split(/\r\n|\n/);
   const [first, ...lines] = text;
   const headers = first.split(",");
@@ -319,62 +285,65 @@ async function csvParser(csvData) {
     const values = line.split(",");
     let csvImportCloneObj = JSON.parse(JSON.stringify(csvImportObj));
     if (values[0] !== undefined && values.length > 1) {
-      csvImportCloneObj.atmLocation.name =
-        values[0] !== null && values[0] !== "" ? values[0] : "";
-      csvImportCloneObj.atmLocation.address.street =
-        values[1] !== null && values[1] !== "" ? values[1] : "";
-      csvImportCloneObj.atmLocation.address.city =
-        values[2] !== null && values[2] !== "" ? values[2] : "";
-      csvImportCloneObj.atmLocation.address.state =
-        values[3] !== null && values[3] !== "" ? values[3] : "";
-      csvImportCloneObj.atmLocation.address.postalCode =
-        values[4] !== null && values[4] !== "" ? values[4] : "";
-      csvImportCloneObj.atmLocation.coordinates.latitude =
-        values[5] !== null && values[5] !== "" ? values[5] : "";
-      csvImportCloneObj.atmLocation.coordinates.longitude =
-        values[6] !== null && values[6] !== "" ? values[6] : "";
-      csvImportCloneObj.atmLocation.isAvailable24Hours =
-        values[7] !== null && values[7] !== ""
-          ? await stringToBoolean(values[7])
-          : false;
-      csvImportCloneObj.atmLocation.isDepositAvailable =
-        values[8] !== null && values[8] !== ""
-          ? await stringToBoolean(values[8])
-          : false;
-      csvImportCloneObj.atmLocation.isCashDepositAvailable =
-        values[9] !== null && values[9] !== ""
-          ? await stringToBoolean(values[9])
-          : false;
-      csvImportCloneObj.atmLocation.isHandicappedAccessible =
-        values[10] !== null && values[10] !== ""
-          ? await stringToBoolean(values[10])
-          : false;
-      csvImportCloneObj.atmLocation.languageType =
-        values[11] !== null && values[11] !== "" ? values[11] : "";
-      csvImportCloneObj.distance = null;
-      csvImportCloneObj.type = "csv";
+      
+        csvImportCloneObj.atmLocation.name =
+          values[0] !== null && values[0] !== "" ? values[0] : "";
+        csvImportCloneObj.atmLocation.address.street =
+          values[1] !== null && values[1] !== "" ? values[1] : "";
+        csvImportCloneObj.atmLocation.address.city =
+          values[2] !== null && values[2] !== "" ? values[2] : "";
+        csvImportCloneObj.atmLocation.address.state =
+          values[3] !== null && values[3] !== "" ? values[3] : "";
+        csvImportCloneObj.atmLocation.address.postalCode =
+          values[4] !== null && values[4] !== "" ? values[4] : "";
+        csvImportCloneObj.atmLocation.coordinates.latitude =
+          values[5] !== null && values[5] !== "" ? values[5] : "";
+        csvImportCloneObj.atmLocation.coordinates.longitude =
+          values[6] !== null && values[6] !== "" ? values[6] : "";
+        csvImportCloneObj.atmLocation.isAvailable24Hours =
+          values[7] !== null && values[7] !== ""
+            ? await stringToBoolean(values[7])
+            : false;
+        csvImportCloneObj.atmLocation.isDepositAvailable =
+          values[8] !== null && values[8] !== ""
+            ? await stringToBoolean(values[8])
+            : false;
+        csvImportCloneObj.atmLocation.isCashDepositAvailable =
+          values[9] !== null && values[9] !== ""
+            ? await stringToBoolean(values[9])
+            : false;
+        csvImportCloneObj.atmLocation.isHandicappedAccessible =
+          values[10] !== null && values[10] !== ""
+            ? await stringToBoolean(values[10])
+            : false;
+        csvImportCloneObj.atmLocation.languageType =
+          values[11] !== null && values[11] !== "" ? values[11] : "";
+        csvImportCloneObj.distance = null;
+        csvImportCloneObj.type = "csv";
 
-      if (
-        csvImportCloneObj.atmLocation.coordinates.latitude != "" &&
-        csvImportCloneObj.atmLocation.coordinates.longitude
-      ) {
-        let distance = await calculateDistance(
-          csvImportCloneObj.atmLocation.coordinates.latitude * 1,
-          csvImportCloneObj.atmLocation.coordinates.longitude * 1,
-          lat,
-          long
-        );
-        csvImportCloneObj.distance = distance.toFixed(2) * 1;
-      }
+        if (
+          csvImportCloneObj.atmLocation.coordinates.latitude != "" &&
+          csvImportCloneObj.atmLocation.coordinates.longitude != ""
+        ) {
+          let distance = await calculateDistance(
+            csvImportCloneObj.atmLocation.coordinates.latitude * 1,
+            csvImportCloneObj.atmLocation.coordinates.longitude * 1,
+            lat,
+            long
+          );
+          csvImportCloneObj.distance = distance.toFixed(2) * 1;
+        }
 
-      csvImportCloneObj.atmLocation.id = await uid();
-
-      if (
-        csvImportCloneObj.distance !== null &&
-        csvImportCloneObj.distance <= 100
-      ) {
-        rows.push(csvImportCloneObj);
-      }
+        csvImportCloneObj.atmLocation.id = await uid();
+      
+      // if (
+      //   csvImportCloneObj.distance !== null &&
+      //   csvImportCloneObj.distance <= 100
+      // ) {
+        if(csvImportCloneObj.atmLocation.coordinates.latitude && csvImportCloneObj.atmLocation.coordinates.longitude){
+          rows.push(csvImportCloneObj);
+        }
+      // }
     }
   }
   return rows;
@@ -382,7 +351,6 @@ async function csvParser(csvData) {
 
 async function handleResponse(response) {
   let status = response.status ? response.status : "error";
-  let statusMessage = response.statusMessage;
   if (
     response.results &&
     response.results !== null &&
@@ -391,7 +359,19 @@ async function handleResponse(response) {
     resObj.length > 0
       ? response.results.map((res) => resObj.push(res))
       : (resObj = response.results);
+
+      if(response.results.length > 0){
+        min = await Math.min(...response.results.map(item => item.distance)).toFixed(2);
+        max = await Math.max(...response.results.map(item => item.distance)).toFixed(2);
+      }
+  } else {
+    max = 100;
   }
+ 
+  if (excelUrl) {
+    await getCSVData();
+  }
+  resObj = resObj.sort((a, b) => a.distance - b.distance);
   switch (status) {
     case "fail":
       if (resObj.length > 0) {
@@ -428,7 +408,6 @@ async function handleResponse(response) {
 }
 
 async function mapATMData(resObject) {
-  // console.log("resObject", resObject)
   if (resObject.length > 0) {
     let html = "";
     await Promise.all(
@@ -489,7 +468,7 @@ async function getATMDiv(cloneObj) {
     .forEach((ele) => {
       ele.innerText = atmLocation.locationDescription
         ? atmLocation.locationDescription
-        : "";
+        :  cloneObj.type === 'csv'?`${atmLocation.address.street} , ${atmLocation.address.city} , ${atmLocation.address.state}, ${atmLocation.address.postalCode}`:"";
     });
   atmCloneItem
     .querySelectorAll(`#atm_${atmLocation.id} .atm-direction`)
@@ -767,7 +746,7 @@ async function handleMapData(resObject) {
         cloneMapObj.properties.description =
           obj.atmLocation && obj.atmLocation.locationDescription
             ? obj.atmLocation.locationDescription
-            : "";
+            : obj.type === 'csv'?`${obj.atmLocation.address.street} , ${obj.atmLocation.address.city} , ${obj.atmLocation.address.state}, ${obj.atmLocation.address.postalCode}`:"";
         cloneMapObj.id = obj.atmLocation.id;
         await geojson.features.push(cloneMapObj);
       })
@@ -777,6 +756,25 @@ async function handleMapData(resObject) {
   await handleDirections();
   await loadMap();
 }
+
+
+const targetDiv = document.querySelector('.atm_page')
+document.addEventListener('click', (e) => {
+  // e.preventDefault();
+  const isClickedInsideDiv = e.composedPath().includes(targetDiv)
+  if (!isClickedInsideDiv) {
+    handleAtmItemSelected();
+    handleMarkerCss();
+    if (map.getLayer("route")) {
+      map.removeLayer("route");
+    }
+    if (map.getSource("route")) {
+      map.removeSource("route");
+    }
+  }else{
+    return true;
+  }
+})
 
 async function loadMap() {
   await clearMarkers();
@@ -824,12 +822,25 @@ async function loadMap() {
             atmItem.closest(".atm_list-wr").classList.remove("open-detail");
             popup.remove();
             handleAtmItemSelected();
+            handleMarkerCss();
           }
         });
+      document.addEventListener('click', (e) => {
+        // e.preventDefault();
+        const targetDiv = document.querySelector('.atm_page')
+        const isClickedInsideDiv = e.composedPath().includes(targetDiv)
+        if (!isClickedInsideDiv) {
+          popup.remove();
+        }else{
+          return true;
+        }
+      });
       await handleDirections();
     });
     // marker.getPopup().on("close", () => {
-    //   handleAtmItemSelected();
+    //   console.log("test");
+      // handleAtmItemSelected();
+      // handleMarkerCss();
     // var atmItem = document.getElementById("atm_" + feature.id);
     // if (atmItem) {
     //   atmItem
@@ -910,6 +921,14 @@ async function handleClickEvent() {
       e.preventDefault();
       var atmId = e.currentTarget.getAttribute("atm-id");
       await handleMarkerClass(atmId);
+      if (map.getLayer("route")) {
+        map.removeLayer("route");
+      }
+      if (map.getSource("route")) {
+        map.removeSource("route");
+      }
+      handleAtmItemSelected(atmId);
+      handleMarkerCss(atmId);
       map.flyTo({
         center: {
           lon: e.currentTarget.getAttribute("data-long"),
@@ -1021,7 +1040,9 @@ async function handleDirections() {
           map.removeSource("route");
         }
         var atm_id = e.currentTarget.getAttribute("id");
-        await handleMarkerClass(atm_id);
+        // await handleMarkerClass(atm_id);
+        handleMarkerCss(atm_id);
+        handleAtmItemSelected(atm_id);
         var destinationLong = e.currentTarget.getAttribute("data-long");
         var destinationLat = e.currentTarget.getAttribute("data-lat");
         var routeJson = await fetchRoute(destinationLong, destinationLat);
