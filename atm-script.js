@@ -378,8 +378,6 @@ async function csvParser(csvData) {
       }
     }
   }
-
-  console.log("rows", rows);
   return rows;
 }
 
