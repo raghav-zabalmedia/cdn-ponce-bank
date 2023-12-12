@@ -365,17 +365,11 @@ async function csvParser(csvData) {
             lat,
             long
           );
-          console.log("distance", distance);
           csvImportCloneObj.distance = distance.toFixed(2) * 1;
         }
 
         csvImportCloneObj.atmLocation.id = await uid();
       
-      console.log(
-        "csvImportCloneObj.distance",
-        csvImportCloneObj.atmLocation.coordinates.latitude,
-        csvImportCloneObj.distance
-      );
       if (
         csvImportCloneObj.distance !== null &&
         csvImportCloneObj.distance <= 100
