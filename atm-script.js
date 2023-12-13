@@ -913,10 +913,20 @@ async function loadMap() {
       document
         .getElementById("atmMain")
         .scroll({ top: offsets, behavior: "smooth" });
-      map.flyTo({
-        center: marker.getLngLat(),
-        zoom: 14,
-      });
+
+      if(window.innerWidth < 479) {
+        map.flyTo({
+          offset: [0, 50],
+          center: marker.getLngLat(),
+          zoom: 14,
+        });
+      } else {
+        map.flyTo({
+          offset: [100, 0],
+          center: marker.getLngLat(),
+          zoom: 14,
+        });
+      }
     });
 
     // map.on('click', event => {
@@ -963,6 +973,7 @@ async function loadMap() {
 async function handleClickEvent() {
   document.querySelectorAll(".atm_item").forEach((item) => {
     item.addEventListener("click", async (e) => {
+     
       e.preventDefault();
       var atmId = e.currentTarget.getAttribute("atm-id");
       await handleMarkerCss(atmId);
@@ -975,17 +986,20 @@ async function handleClickEvent() {
       handleAtmItemSelected(atmId);
       handleMarkerCss(atmId);
       map.flyTo({
-	offset: [0, 40],
+        offset: [0, -100],
         center: {
           lon: e.currentTarget.getAttribute("data-long"),
           lat: e.currentTarget.getAttribute("data-lat"),
         },
         zoom: 14,
       });
-     
-      if(window.innerWidth < 479) {
-        document.querySelector(".mobile_close-trigger").click();
-      }
+
+      setTimeout(() => {
+        if(window.innerWidth < 479) {
+          document.querySelector(".mobile_close-trigger").click();
+        }
+      }, 500);
+      
     });
   });
 }
