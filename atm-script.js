@@ -831,6 +831,9 @@ async function loadMap() {
             .classList.add("open");
           atmItem.closest(".atm_list-wr").classList.add("open-detail");
           document.querySelector(".atm_show-trigger").click();
+	if(window.innerWidth < 479) {
+            document.querySelector(".mobile_close-trigger").click();
+          }
         });
       document
         .querySelector(`#atm_popup${feature.id} .close-marker-detail`)
