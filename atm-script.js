@@ -95,7 +95,7 @@ const map = new mapboxgl.Map({
   scrollZoom: false,
   boxZoom: false,
   doubleClickZoom: false,
-  dragPan: false,
+  //dragPan: false,
 });
 
 const geolocate = new mapboxgl.GeolocateControl({
