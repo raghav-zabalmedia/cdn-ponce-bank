@@ -921,7 +921,7 @@ async function loadMap() {
     //   marker.togglePopup();
     // });
 
-    document
+    /* document
       .querySelector(`#atm_popup_marker${feature.id}`)
       .addEventListener("mouseover", (e) => {
         e.stopImmediatePropagation();
@@ -931,7 +931,7 @@ async function loadMap() {
         handleMarkerCss();
         // handleAtmItemSelected();
         // popup.setLngLat(feature.geometry.coordinates).setHTML(htmlModalData).addTo(map);
-      });
+      });*/
 
     /* marker
       .getElement()
