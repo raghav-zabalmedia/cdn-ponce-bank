@@ -975,6 +975,7 @@ async function handleClickEvent() {
       handleAtmItemSelected(atmId);
       handleMarkerCss(atmId);
       map.flyTo({
+	offset: [0, 40],
         center: {
           lon: e.currentTarget.getAttribute("data-long"),
           lat: e.currentTarget.getAttribute("data-lat"),
