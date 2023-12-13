@@ -976,6 +976,9 @@ async function handleClickEvent() {
         },
         zoom: 14,
       });
+if(window.innerWidth < 479) {
+        document.querySelector(".mobile_close-trigger").click();
+      }
     });
   });
 }
