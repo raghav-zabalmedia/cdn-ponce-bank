@@ -95,7 +95,7 @@ const map = new mapboxgl.Map({
   scrollZoom: false,
   boxZoom: false,
   doubleClickZoom: false,
-  //dragPan: false,
+  // dragPan: false,
 });
 
 const geolocate = new mapboxgl.GeolocateControl({
@@ -831,9 +831,14 @@ async function loadMap() {
             .classList.add("open");
           atmItem.closest(".atm_list-wr").classList.add("open-detail");
           document.querySelector(".atm_show-trigger").click();
-	if(window.innerWidth < 479) {
-            document.querySelector(".mobile_close-trigger").click();
-          }
+          console.log('window.innerWidth', window.innerWidth)
+          setTimeout(() => {
+            if(window.innerWidth < 479) {
+              const link = document.querySelector(".mobile_close-trigger")
+              link.click();
+            }  
+          }, 500);
+          
         });
       document
         .querySelector(`#atm_popup${feature.id} .close-marker-detail`)
@@ -898,9 +903,9 @@ async function loadMap() {
         map.removeSource("route");
       }
       handleMarkerCss(e.target.getAttribute("dataId"));
-      if (document.querySelector(".atm_hide-trigger").style.display == "none") {
-        document.querySelector(".atm_show-trigger").click();
-      }
+      // if (document.querySelector(".atm_hide-trigger").style.display == "none") {
+      //   document.querySelector(".atm_show-trigger").click();
+      // }
       handleAtmItemSelected(e.target.getAttribute("dataId"));
       var offsets = document.getElementById(
         `atm_${e.target.getAttribute("dataId")}`
@@ -931,7 +936,7 @@ async function loadMap() {
         handleMarkerCss();
         // handleAtmItemSelected();
         // popup.setLngLat(feature.geometry.coordinates).setHTML(htmlModalData).addTo(map);
-      });*/
+      }); */
 
     /* marker
       .getElement()
@@ -976,7 +981,8 @@ async function handleClickEvent() {
         },
         zoom: 14,
       });
-if(window.innerWidth < 479) {
+     
+      if(window.innerWidth < 479) {
         document.querySelector(".mobile_close-trigger").click();
       }
     });
@@ -1251,6 +1257,3 @@ async function calculateDistance(lat1, lon1, lat2, lon2, unit) {
 async function uid() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
-
-
-
