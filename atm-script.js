@@ -700,6 +700,7 @@ document
 document
   .querySelector("#reset-filters")
   .addEventListener("click", async (event) => {
+    await handleHide(".atm_list--empty");
     document.getElementsByClassName("atm_filters_toggle")[0].click();
     if (filterCount > 0) {
       filterCount = 0;
