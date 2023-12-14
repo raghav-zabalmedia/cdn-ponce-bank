@@ -833,10 +833,9 @@ let data = new URLSearchParams();
             document.querySelector(".atm_show-trigger").click();
             setTimeout(() => {
               if(window.innerWidth < 479) {
-                const link = document.querySelector(".mobile_close-trigger")
-                link.click();
+                document.querySelector(".mobile_close-trigger").click();
               }  
-            }, 500);
+            }, 600);
             
           });
         document
