@@ -916,7 +916,7 @@ async function loadMap() {
 
       if(window.innerWidth < 479) {
         map.flyTo({
-          offset: [0, 80],
+          offset: [0, 100],
           center: marker.getLngLat(),
           zoom: 14,
         });
