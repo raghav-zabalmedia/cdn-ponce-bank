@@ -11,7 +11,7 @@ const GET_ATM_URL = "/locations/atm";
 let lat, long;
 let page = 1;
 let count = 20;
-let radius = 10;
+let radius = 2;
 let resObj = [];
 let totalFound = 0;
 let searchVal = "";
@@ -107,10 +107,15 @@ const geolocate = new mapboxgl.GeolocateControl({
   trackUserLocation: true,
 });
 
+let showZoom = true;
+if (window.innerWidth < 479) {
+  showZoom = false;
+}
 // Add the control to the map.
 map.addControl(
   new mapboxgl.NavigationControl({
     showCompass: false,
+    showZoom: showZoom
   }),
   "bottom-right"
 );
@@ -186,6 +191,10 @@ $(document).ready(async function () {
       center: e.features[0].geometry.coordinates,
     });
   });
+  if (window.innerWidth < 479) {
+    document.querySelectorAll('.mapboxgl-ctrl-group')?.[1].remove();
+  }
+
 });
 handleDirections();
 
