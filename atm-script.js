@@ -10,8 +10,8 @@ let ENDPOINT = "https://locatorapistaging.moneypass.com/Service.svc";
 const GET_ATM_URL = "/locations/atm";
 let lat, long;
 let page = 1;
-let count = 10;
-let radius = 100;
+let count = 20;
+let radius = 2;
 let resObj = [];
 let totalFound = 0;
 let searchVal = "";
@@ -406,7 +406,7 @@ async function handleResponse(response) {
       ).toFixed(2);
     }
   } else {
-    max = 100;
+    max = radius;
   }
 
   if (excelUrl) {
@@ -617,10 +617,8 @@ document
       if (searchVal && searchVal.length > 0) {
         var searchObj = resObj.filter(
           (obj) =>
-            obj.atmLocation.name.toLowerCase().includes(searchVal) ||
-            obj.atmLocation.locationDescription
-              .toLowerCase()
-              .includes(searchVal)
+            obj.atmLocation.address.city.toLowerCase().includes(searchVal) ||
+            obj.atmLocation.address.postalCode.toLowerCase().includes(searchVal)
         );
         await mapATMData(searchObj);
       } else {
@@ -700,11 +698,23 @@ document
 document
   .querySelector("#reset-filters")
   .addEventListener("click", async (event) => {
+    searchVal = "";
+    document.getElementsByClassName("atm_search-field")[0].value = "";
     await handleHide(".atm_list--empty");
+    await handleHide("#atmList");
     document.getElementsByClassName("atm_filters_toggle")[0].click();
     if (filterCount > 0) {
       filterCount = 0;
       await handleClearFilter();
+    } else {
+      if (resObj.length <= 0) {
+        await handleShow(".atm_list--empty");
+        await handleHide("#atmList");
+        await handleHide(".simple-spinner");
+        await handleHide(".bottom-spinner");
+      } else {
+        await mapATMData(resObj);
+      }
     }
   });
 
@@ -742,7 +752,10 @@ async function handleServiceFilter(serviceFilter) {
     const ATMData = await getATMData(data, GET_ATM_URL, ".simple-spinner");
     await handleResponse(ATMData);
   } else {
-    return true;
+    await handleShow(".atm_list--empty");
+    await handleHide("#atmList");
+    await handleHide(".simple-spinner");
+    await handleHide(".bottom-spinner");
   }
 }
 
@@ -762,7 +775,10 @@ async function handleLanguageFilter(languages) {
       await mapATMData(searchObj);
     }
   } else {
-    return true;
+    await handleShow(".atm_list--empty");
+    await handleHide("#atmList");
+    await handleHide(".simple-spinner");
+    await handleHide(".bottom-spinner");
   }
 }
 
@@ -928,6 +944,11 @@ async function loadMap() {
     // });
     marker.getElement().addEventListener("click", (e) => {
       e.preventDefault();
+      var atmMainDiv = document.querySelector(".atm_item .open");
+      if (atmMainDiv) {
+        atmMainDiv.classList.remove("open");
+        atmMainDiv.closest(".atm_list-wr").classList.remove("open-detail");
+      }
       handleMapReset("", e.target.getAttribute("dataId"));
       // if (document.querySelector(".atm_hide-trigger").style.display == "none") {
       //   document.querySelector(".atm_show-trigger").click();
@@ -962,35 +983,35 @@ async function loadMap() {
     // });
 
     /* document
-        .querySelector(`#atm_popup_marker${feature.id}`)
-        .addEventListener("mouseover", (e) => {
-          e.stopImmediatePropagation();
-          e.stopPropagation();
-          e.preventDefault();
-          marker.getElement().click();
-          handleMarkerCss();
-          // handleAtmItemSelected();
-          // popup.setLngLat(feature.geometry.coordinates).setHTML(htmlModalData).addTo(map);
-        }); */
+            .querySelector(`#atm_popup_marker${feature.id}`)
+            .addEventListener("mouseover", (e) => {
+              e.stopImmediatePropagation();
+              e.stopPropagation();
+              e.preventDefault();
+              marker.getElement().click();
+              handleMarkerCss();
+              // handleAtmItemSelected();
+              // popup.setLngLat(feature.geometry.coordinates).setHTML(htmlModalData).addTo(map);
+            }); */
 
     /* marker
-        .getElement()
-        .addEventListener(
-          "mouseenter",
-          () => (map.getCanvas().style.cursor = "pointer")
-        );
-      marker
-        .getElement()
-        .addEventListener(
-          "mouseleave",
-          () => (map.getCanvas().style.cursor = "")
-        ); */
+            .getElement()
+            .addEventListener(
+              "mouseenter",
+              () => (map.getCanvas().style.cursor = "pointer")
+            );
+          marker
+            .getElement()
+            .addEventListener(
+              "mouseleave",
+              () => (map.getCanvas().style.cursor = "")
+            ); */
     /*   document
-        .querySelector(`#atm_popup_marker${feature.id}`)
-        .addEventListener("mouseleave", () => marker.togglePopup());
-      document
-        .querySelector(`#atm_popup_marker${feature.id}`)
-        .addEventListener("mouseover", () => marker.togglePopup()); */
+            .querySelector(`#atm_popup_marker${feature.id}`)
+            .addEventListener("mouseleave", () => marker.togglePopup());
+          document
+            .querySelector(`#atm_popup_marker${feature.id}`)
+            .addEventListener("mouseover", () => marker.togglePopup()); */
     markers.push(marker);
   }
 }
@@ -1036,9 +1057,17 @@ async function handleClickEvent() {
           handleMapReset();
         });
       await handleMapReset("", atmId);
-      handleMarkerClass(atmId);
+      const popups = document.getElementsByClassName("mapboxgl-popup");
+      if (
+        popups.length > 0 &&
+        popups[0].querySelector(".atm_item--on-map")?.getAttribute("id") !=
+          `atm_popup${atmId}`
+      ) {
+        popups[0].remove();
+      }
+      // handleMarkerClass(atmId);
       map.flyTo({
-        offset: [0, -100],
+        offset: [100, 0],
         center: {
           lon: e.currentTarget.getAttribute("data-long"),
           lat: e.currentTarget.getAttribute("data-lat"),
