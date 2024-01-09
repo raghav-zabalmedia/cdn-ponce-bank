@@ -204,6 +204,7 @@ if (window.innerWidth < 479) {
     }
 
     $("#atmList").toggleClass("show-list");
+    $(".atm_list--empty").toggleClass("show-list");
   });
 
   $("#filtersTrigger").click(function () {
