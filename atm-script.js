@@ -221,16 +221,19 @@ if (window.innerWidth < 479) {
   });
 
   const resizeObserver = new ResizeObserver((entries) => {
-    if (!$("#atmList").hasClass("show-list")) {
+    if (
+      $("#atmList").hasClass("show-list") ||
+      $(".atm_list--empty").hasClass("show-list")
+    ) {
       $(".mapboxgl-ctrl-bottom-right")[0].style.setProperty(
         "bottom",
-        "58px",
+        $(".atm_content").height() + "px",
         "important"
       );
     } else {
       $(".mapboxgl-ctrl-bottom-right")[0].style.setProperty(
         "bottom",
-        $(".atm_content").height() - 39 + "px",
+        $(".atm_content").height() + "px",
         "important"
       );
     }
