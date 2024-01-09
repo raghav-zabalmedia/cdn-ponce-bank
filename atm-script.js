@@ -210,11 +210,13 @@ if (window.innerWidth < 479) {
   $("#filtersTrigger").click(function () {
     if (!$("#atmList").hasClass("show-list")) {
       $("#atmList").toggleClass("show-list");
+      $(".atm_list--empty").toggleClass("show-list");
     }
   });
   $("input#name").click(function () {
     if (!$("#atmList").hasClass("show-list")) {
       $("#atmList").toggleClass("show-list");
+      $(".atm_list--empty").toggleClass("show-list");
     }
   });
 
