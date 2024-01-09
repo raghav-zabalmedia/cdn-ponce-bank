@@ -690,7 +690,7 @@ document
 .getElementById("wf-form-Filters")
 .addEventListener("submit", (event) => {
 if (window.innerWidth < 479) {
-$('#atmMain').focus();
+        $('input#name').trigger('blur');
 }
 event.preventDefault();
 return false;
