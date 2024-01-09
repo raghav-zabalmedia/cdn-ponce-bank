@@ -691,6 +691,7 @@ document
 .addEventListener("submit", (event) => {
 if (window.innerWidth < 479) {
         $('input#name').trigger('blur');
+        alert(0)
 }
 event.preventDefault();
 return false;
