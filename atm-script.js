@@ -659,13 +659,32 @@ document
   .querySelector(".atm_search-field")
   .addEventListener("keypress", async (event) => {
     if (event.key == "Enter") {
+      await handleShow(".simple-spinner");
+      inputFilter();
       $("input#name").trigger("blur");
       event.preventDefault();
       return false;
     }
   });
 
-document
+  async function inputFilter () {
+    searchVal =  document.querySelector(".atm_search-field").value.toLowerCase();
+    if (resObj.length > 0) {
+      if (searchVal && searchVal.length > 0) {
+        var searchObj = resObj.filter(
+          (obj) =>
+            obj.atmLocation.address.city.toLowerCase().includes(searchVal) ||
+            obj.atmLocation.address.postalCode.toLowerCase().includes(searchVal)
+        );
+        await mapATMData(searchObj);
+      } else {
+        await mapATMData(resObj);
+      }
+    } else {
+      await mapATMData(resObj);
+    }
+  }
+/* document
   .querySelector(".atm_search-field")
   .addEventListener("keyup", async (event) => {
     searchVal = event.target.value.toLowerCase();
@@ -683,7 +702,7 @@ document
     } else {
       await mapATMData(resObj);
     }
-  });
+  }); */
 
 document
   .querySelector(".atm_filters_toggle, #close-filters")
