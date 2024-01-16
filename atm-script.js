@@ -6,7 +6,8 @@ let excelUrl =
   "https://uploads-ssl.webflow.com/63500fd89166a09e3c3efaf0/657ae4b5ccaafa204032df56_Citibank_BranchList%20-%20Sheet1.csv";
 
 let data = new URLSearchParams();
-let ENDPOINT = "https://locatorapistaging.moneypass.com/Service.svc";
+//let ENDPOINT = "https://locatorapistaging.moneypass.com/Service.svc";
+let ENDPOINT = "https://locatorapi.moneypass.com/Service.svc";
 const GET_ATM_URL = "/locations/atm";
 let lat, long;
 let page = 1;
