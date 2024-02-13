@@ -13,7 +13,7 @@ const GET_ATM_URL = "/locations/atm";
 let lat, long;
 let page = 1;
 let count = 10000;
-let radius = 21;
+let radius = 10;
 let resObj = [];
 let totalFound = 0;
 let searchVal = "";
