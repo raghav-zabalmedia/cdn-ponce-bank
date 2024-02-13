@@ -789,6 +789,28 @@ document
     searchVal = "";
     document.getElementsByClassName("atm_search-field")[0].value = "";
     await handleHide(".simple-spinner");
+    const atmLocationData = document.querySelector("#atmList .atm_item");
+    if (atmLocationData) {
+      if (window.innerWidth < 479) {
+        map.flyTo({
+          offset: [0, 80],
+          center: {
+            lon: atmLocationData.getAttribute("data-long"),
+            lat: atmLocationData.getAttribute("data-lat"),
+          },
+          zoom: 10,
+        });
+      } else {
+        map.flyTo({
+          offset: [100, 0],
+          center: {
+            lon: atmLocationData.getAttribute("data-long"),
+            lat: atmLocationData.getAttribute("data-lat"),
+          },
+          zoom: 10,
+        });
+      }
+    }
   });
 
 document
@@ -1484,4 +1506,3 @@ function capitalizeWords(input) {
     return a.toUpperCase();
   });
 }
-
