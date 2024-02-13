@@ -387,19 +387,19 @@ async function csvParser(csvData) {
         values[11] !== null && values[11] !== "" ? values[11] : "";
       csvImportCloneObj.atmLocation.locationDescription = `${
         csvImportCloneObj.atmLocation.address.street
-          ? csvImportCloneObj.atmLocation.address.street
+          ? capitalizeWords(csvImportCloneObj.atmLocation.address.street)
           : ""
       } , ${
         csvImportCloneObj.atmLocation.address.city
-          ? csvImportCloneObj.atmLocation.address.city
+          ? capitalizeWords(csvImportCloneObj.atmLocation.address.city)
           : ""
       } , ${
         csvImportCloneObj.atmLocation.address.state
-          ? csvImportCloneObj.atmLocation.address.state
+          ? csvImportCloneObj.atmLocation.address.state.toUpperCase()
           : ""
-      }, ${
+      } ${
         csvImportCloneObj.atmLocation.address.postalCode
-          ? csvImportCloneObj.atmLocation.address.postalCode
+          ? capitalizeWords(csvImportCloneObj.atmLocation.address.postalCode)
           : ""
       }`;
       csvImportCloneObj.distance = null;
@@ -508,6 +508,23 @@ async function mapATMData(resObject) {
     let html = "";
     await Promise.all(
       resObject.map(async (obj) => {
+        obj.atmLocation.locationDescription = `${
+          obj.atmLocation.address.street
+            ? capitalizeWords(obj.atmLocation.address.street)
+            : ""
+        } , ${
+          obj.atmLocation.address.city
+            ? capitalizeWords(obj.atmLocation.address.city)
+            : ""
+        } , ${
+          obj.atmLocation.address.state
+            ? obj.atmLocation.address.state.toUpperCase()
+            : ""
+        } ${
+          obj.atmLocation.address.postalCode
+            ? capitalizeWords(obj.atmLocation.address.postalCode)
+            : ""
+        }`;
         let atmItemDiv = await getATMDiv(obj);
         html += atmItemDiv;
       })
@@ -562,29 +579,7 @@ async function getATMDiv(cloneObj) {
   atmCloneItem
     .querySelectorAll(`#atm_${atmLocation.id} .atm-address`)
     .forEach((ele) => {
-      var text = atmLocation.locationDescription
-        ? atmLocation.locationDescription
-        : cloneObj.type === "csv"
-        ? `${
-            atmLocation.address && atmLocation.address.street
-              ? atmLocation.address.street
-              : ""
-          } , ${
-            atmLocation.address && atmLocation.address.city
-              ? atmLocation.address.city
-              : ""
-          } , ${
-            atmLocation.address && atmLocation.address.state
-              ? atmLocation.address.state
-              : ""
-          }, ${
-            atmLocation.address && atmLocation.address.postalCode
-              ? atmLocation.address.postalCode
-              : ""
-          }`
-        : "";
-
-      ele.innerText = capitalizeWords(text);
+      ele.innerText = atmLocation.locationDescription;
     });
   atmCloneItem
     .querySelectorAll(`#atm_${atmLocation.id} .atm-direction`)
@@ -679,6 +674,27 @@ async function inputFilter() {
           obj.atmLocation.address.postalCode.toLowerCase().includes(searchVal)
       );
       await mapATMData(searchObj);
+      if (searchObj.length > 0) {
+        if (window.innerWidth < 479) {
+          map.flyTo({
+            offset: [0, 80],
+            center: {
+              lon: searchObj[0]?.atmLocation?.coordinates?.longitude,
+              lat: searchObj[0]?.atmLocation?.coordinates?.latitude,
+            },
+            zoom: 10,
+          });
+        } else {
+          map.flyTo({
+            offset: [100, 0],
+            center: {
+              lon: searchObj[0]?.atmLocation?.coordinates?.longitude,
+              lat: searchObj[0]?.atmLocation?.coordinates?.latitude,
+            },
+            zoom: 10,
+          });
+        }
+      }
     } else {
       await mapATMData(resObj);
     }
@@ -900,26 +916,23 @@ async function handleMapData(resObject) {
           obj.atmLocation && obj.atmLocation.name
             ? capitalizeWords(obj.atmLocation.name)
             : "";
-        cloneMapObj.properties.description =
-          obj.atmLocation && obj.atmLocation.locationDescription
-            ? obj.atmLocation.locationDescription
-            : obj.type === "csv"
-            ? `${
-                obj.atmLocation.address.street
-                  ? obj.atmLocation.address.street
-                  : ""
-              } , ${
-                obj.atmLocation.address.city ? obj.atmLocation.address.city : ""
-              } , ${
-                obj.atmLocation.address.state
-                  ? obj.atmLocation.address.state
-                  : ""
-              }, ${
-                obj.atmLocation.address.postalCode
-                  ? obj.atmLocation.address.postalCode
-                  : ""
-              }`
-            : "";
+        cloneMapObj.properties.description = `${
+          obj.atmLocation.address.street
+            ? capitalizeWords(obj.atmLocation.address.street)
+            : ""
+        } , ${
+          obj.atmLocation.address.city
+            ? capitalizeWords(obj.atmLocation.address.city)
+            : ""
+        } , ${
+          obj.atmLocation.address.state
+            ? obj.atmLocation.address.state.toUpperCase()
+            : ""
+        } ${
+          obj.atmLocation.address.postalCode
+            ? capitalizeWords(obj.atmLocation.address.postalCode)
+            : ""
+        }`;
         cloneMapObj.id = obj.atmLocation.id;
         await geojson.features.push(cloneMapObj);
       })
@@ -1173,7 +1186,9 @@ async function handleClickEvent() {
           document.querySelector(".mobile_close-trigger").click();
         }
         document.querySelector(`#atm_popup_marker${atmId}`).click();
-        document.querySelector(`#atm_popup${atmId} .open-modal-details`).click();
+        document
+          .querySelector(`#atm_popup${atmId} .open-modal-details`)
+          .click();
       }, 500);
     });
   });
@@ -1209,7 +1224,7 @@ async function getPopupModal(atmId) {
   atmClonePopupItem.querySelector(
     `#atm_popup${atmLocation.id} #modal-address`
   ).innerText = atmLocation.locationDescription
-    ? capitalizeWords(atmLocation.locationDescription)
+    ? atmLocation.locationDescription
     : "";
   if (atmLocation.isAvailable24Hours) {
     atmClonePopupItem
@@ -1469,3 +1484,4 @@ function capitalizeWords(input) {
     return a.toUpperCase();
   });
 }
+
