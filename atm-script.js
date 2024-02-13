@@ -13,7 +13,7 @@ const GET_ATM_URL = "/locations/atm";
 let lat, long;
 let page = 1;
 let count = 10000;
-let radius = 2;
+let radius = 21;
 let resObj = [];
 let totalFound = 0;
 let searchVal = "";
@@ -1185,10 +1185,10 @@ async function handleClickEvent() {
         if (window.innerWidth < 479) {
           document.querySelector(".mobile_close-trigger").click();
         }
-        document.querySelector(`#atm_popup_marker${atmId}`).click();
-        document
-          .querySelector(`#atm_popup${atmId} .open-modal-details`)
-          .click();
+        // document.querySelector(`#atm_popup_marker${atmId}`).click();
+        // document
+        //   .querySelector(`#atm_popup${atmId} .open-modal-details`)
+        //   .click();
       }, 500);
     });
   });
