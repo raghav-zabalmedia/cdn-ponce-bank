@@ -1000,6 +1000,9 @@ async function loadMap() {
       document
         .querySelector(`#atm_popup${feature.id} .open-modal-details`)
         .addEventListener("click", function (e) {
+          e.stopImmediatePropagation();
+          e.stopPropagation();
+          e.preventDefault();
           var currentAtmId = e.currentTarget.getAttribute("atm-id");
           var atmItem = document.getElementById("atm_" + currentAtmId);
           atmItem
@@ -1008,10 +1011,9 @@ async function loadMap() {
             .classList.add("open");
           atmItem.closest(".atm_list-wr").classList.add("open-detail");
           document.querySelector(".atm_show-trigger").click();
-          setTimeout(() => {
+          setTimeout(async () => {
             if (window.innerWidth < 479) {
-              const link = document.querySelector(".mobile_close-trigger");
-              link.click();
+              await document.querySelector(".mobile_close-trigger").click();
             }
           }, 500);
         });
