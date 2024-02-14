@@ -229,13 +229,13 @@ if (window.innerWidth < 479) {
     ) {
       $(".mapboxgl-ctrl-bottom-right")[0].style.setProperty(
         "bottom",
-        ($(".atm_content").height() - 40) + "px",
+        $(".atm_content").height() - 40 + "px",
         "important"
       );
     } else {
       $(".mapboxgl-ctrl-bottom-right")[0].style.setProperty(
         "bottom",
-        ($(".atm_content").height() - 40) + "px",
+        $(".atm_content").height() - 40 + "px",
         "important"
       );
     }
@@ -656,8 +656,13 @@ document
   .querySelector(".atm_search-field")
   .addEventListener("keypress", async (event) => {
     if (event.key == "Enter") {
+      await handleHide(".atm_list--empty");
+      await handleHide("#atmList");
       await handleShow(".simple-spinner");
-      await inputFilter();
+      setTimeout(async () => {
+        await inputFilter();
+        await handleLocation();
+      }, 2000);
       $("input#name").trigger("blur");
       event.preventDefault();
       return false;
@@ -674,27 +679,6 @@ async function inputFilter() {
           obj.atmLocation.address.postalCode.toLowerCase().includes(searchVal)
       );
       await mapATMData(searchObj);
-      if (searchObj.length > 0) {
-        if (window.innerWidth < 479) {
-          map.flyTo({
-            offset: [0, 80],
-            center: {
-              lon: searchObj[0]?.atmLocation?.coordinates?.longitude,
-              lat: searchObj[0]?.atmLocation?.coordinates?.latitude,
-            },
-            zoom: 10,
-          });
-        } else {
-          map.flyTo({
-            offset: [100, 0],
-            center: {
-              lon: searchObj[0]?.atmLocation?.coordinates?.longitude,
-              lat: searchObj[0]?.atmLocation?.coordinates?.latitude,
-            },
-            zoom: 10,
-          });
-        }
-      }
     } else {
       await mapATMData(resObj);
     }
@@ -789,28 +773,7 @@ document
     searchVal = "";
     document.getElementsByClassName("atm_search-field")[0].value = "";
     await handleHide(".simple-spinner");
-    const atmLocationData = document.querySelector("#atmList .atm_item");
-    if (atmLocationData) {
-      if (window.innerWidth < 479) {
-        map.flyTo({
-          offset: [0, 80],
-          center: {
-            lon: atmLocationData.getAttribute("data-long"),
-            lat: atmLocationData.getAttribute("data-lat"),
-          },
-          zoom: 10,
-        });
-      } else {
-        map.flyTo({
-          offset: [100, 0],
-          center: {
-            lon: atmLocationData.getAttribute("data-long"),
-            lat: atmLocationData.getAttribute("data-lat"),
-          },
-          zoom: 10,
-        });
-      }
-    }
+    await handleLocation();
   });
 
 document
@@ -834,6 +797,7 @@ document
         await mapATMData(resObj);
       }
     }
+    await handleLocation();
   });
 
 async function handleClearFilter() {
@@ -1507,4 +1471,29 @@ function capitalizeWords(input) {
   return input.toLowerCase().replace(/(?:^|\s)\S/g, function (a) {
     return a.toUpperCase();
   });
+}
+
+async function handleLocation() {
+  const atmLocationData = document.querySelector("#atmList .atm_item");
+  if (atmLocationData) {
+    if (window.innerWidth < 479) {
+      map.flyTo({
+        offset: [0, 80],
+        center: {
+          lon: atmLocationData.getAttribute("data-long"),
+          lat: atmLocationData.getAttribute("data-lat"),
+        },
+        zoom: 10,
+      });
+    } else {
+      map.flyTo({
+        offset: [100, 0],
+        center: {
+          lon: atmLocationData.getAttribute("data-long"),
+          lat: atmLocationData.getAttribute("data-lat"),
+        },
+        zoom: 10,
+      });
+    }
+  }
 }
