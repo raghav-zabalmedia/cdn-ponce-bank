@@ -1478,7 +1478,7 @@ async function handleLocation() {
   if (atmLocationData) {
     if (window.innerWidth < 479) {
       map.flyTo({
-        offset: [0, 80],
+        offset: [0, -150],
         center: {
           lon: atmLocationData.getAttribute("data-long"),
           lat: atmLocationData.getAttribute("data-lat"),
