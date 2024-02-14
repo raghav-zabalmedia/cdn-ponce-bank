@@ -657,11 +657,17 @@ document
   .addEventListener("keypress", async (event) => {
     if (event.key == "Enter") {
       await handleHide(".atm_list--empty");
+      if (window.innerWidth < 479) {
+        document.querySelector("#atmMain").style.height = '414px'
+      }
       await handleHide("#atmList");
       await handleShow(".simple-spinner");
       setTimeout(async () => {
         await inputFilter();
         await handleLocation();
+          if (window.innerWidth < 479) {
+            document.querySelector("#atmMain").style.height = '100%'
+          }
       }, 2000);
       $("input#name").trigger("blur");
       event.preventDefault();
