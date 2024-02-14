@@ -229,13 +229,13 @@ if (window.innerWidth < 479) {
     ) {
       $(".mapboxgl-ctrl-bottom-right")[0].style.setProperty(
         "bottom",
-        ($(".atm_content").height() - 50) + "px",
+        ($(".atm_content").height() - 40) + "px",
         "important"
       );
     } else {
       $(".mapboxgl-ctrl-bottom-right")[0].style.setProperty(
         "bottom",
-        ($(".atm_content").height() - 50) + "px",
+        ($(".atm_content").height() - 40) + "px",
         "important"
       );
     }
