@@ -203,10 +203,13 @@ if (window.innerWidth < 479) {
   $("#pinkTrigger").click(function () {
     if ($("#atmList").hasClass("show-list")) {
       $("#atmMain").removeClass("open-detail");
+      $("#atmMain").removeClass("show-atmMain");
+    } else {
+      $("#atmMain").addClass("show-atmMain");
     }
 
     $("#atmList").toggleClass("show-list");
-    $("#atmMain").toggleClass("show-atmMain");
+    
     $(".atm_list--empty").toggleClass("show-list");
   });
 
