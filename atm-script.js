@@ -722,6 +722,22 @@ document
           ele.previousElementSibling.classList.remove("w--redirected-checked");
         }
       });
+    } else {
+      document.querySelectorAll("input[type=checkbox]").forEach((ele) => {
+        var serviceFilterData = data.get("filter")
+          ? data.get("filter").split("&&")
+          : [];
+        if (
+          serviceFilterData.includes(ele.getAttribute("id")) ||
+          languages.includes(ele.getAttribute("data-val"))
+        ) {
+          ele.checked = true;
+          ele.previousElementSibling.classList.add("w--redirected-checked");
+        } else {
+          ele.checked = false;
+          ele.previousElementSibling.classList.remove("w--redirected-checked");
+        }
+      });
     }
     // $("#atmMain").slideToggle("slow");
   });
@@ -760,6 +776,9 @@ document
     await handleFilterCount(
       serviceFilter.length + (languages.length > 0 ? 1 : 0)
     );
+    if (!serviceFilter.length) {
+      await data.delete("filter");
+    }
     document.getElementsByClassName("atm_filters_toggle")[0].click();
     await handleHide("#atmList");
     await handleHide(".atm_list--empty");
