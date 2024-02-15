@@ -206,6 +206,7 @@ if (window.innerWidth < 479) {
     }
 
     $("#atmList").toggleClass("show-list");
+    $("#atmMain").toggleClass("show-atmMain");
     $(".atm_list--empty").toggleClass("show-list");
   });
 
