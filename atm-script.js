@@ -718,7 +718,7 @@ document
     if (filterCount <= 0) {
       document.querySelectorAll("input[type=checkbox]").forEach((ele) => {
         if (ele.checked) {
-          ele.setAttribute("checked", false);
+          ele.checked = false;
           ele.previousElementSibling.classList.remove("w--redirected-checked");
         }
       });
