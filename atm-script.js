@@ -4,7 +4,7 @@ mapboxgl.accessToken =
   "pk.eyJ1IjoicG9uY2ViYW5rIiwiYSI6ImNsbnVkaXpvcjBhZ2kycm1maW44dDBpa2sifQ.Z64WawPBDYfTOj4NdUDIkw";
 
 let excelUrl =
-  "https://uploads-ssl.webflow.com/63500fd89166a09e3c3efaf0/657ae4b5ccaafa204032df56_Citibank_BranchList%20-%20Sheet1.csv";
+  "https://uploads-ssl.webflow.com/63500fd89166a09e3c3efaf0/65ceecaab37c24df88429b9b_Citibank_BranchList.csv";
 
 let data = new URLSearchParams();
 let ENDPOINT = "https://locatorapistaging.moneypass.com/Service.svc";
