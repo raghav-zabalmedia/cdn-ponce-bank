@@ -1549,11 +1549,14 @@ async function handleLocation() {
 }
 
 async function getGeocodeFromAddress(searchText) {
-  return await fetch(
-    `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-      searchText
-    )}.json?access_token=${MAPBOX_ACCESS_TOKEN}`
-  )
+  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${searchText}.json`;
+    const params = {
+        access_token: MAPBOX_ACCESS_TOKEN,
+        types: 'postcode,place',
+        limit: 1
+    };
+
+  return await fetch(url + '?' + new URLSearchParams(params))
     .then((response) => response.json())
     .then((data) => {
       console.log('data', data)
