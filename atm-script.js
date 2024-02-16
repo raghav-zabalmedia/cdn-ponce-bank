@@ -1553,7 +1553,8 @@ async function getGeocodeFromAddress(searchText) {
     const params = {
         access_token: MAPBOX_ACCESS_TOKEN,
         types: 'postcode,place',
-        bbox: '-125.0,24.396308,-66.93457,49.384358'
+        //bbox: '-125.0,24.396308,-66.93457,49.384358'
+        country: "US"
     };
 
   return await fetch(url + '?' + new URLSearchParams(params))
