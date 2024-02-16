@@ -100,7 +100,14 @@ const map = new mapboxgl.Map({
   doubleClickZoom: false,
   // dragPan: false,
 });
-
+map.on("wheel", (event) => {
+  if (event.originalEvent.ctrlKey) {
+    event.originalEvent.preventDefault();
+    if (!map.scrollZoom._enabled) map.scrollZoom.enable();
+  } else {
+    if (map.scrollZoom._enabled) map.scrollZoom.disable();
+  }
+});
 const geolocate = new mapboxgl.GeolocateControl({
   positionOptions: {
     enableHighAccuracy: true,
@@ -708,6 +715,8 @@ async function inputFilter() {
         const ATMData = await getATMData(data, GET_ATM_URL, ".simple-spinner");
         await handleResponse(ATMData);
         await handleHide(".simple-spinner");
+      }else {
+        await mapATMData([]);
       }
     } else {
       await mapATMData(resObj);
