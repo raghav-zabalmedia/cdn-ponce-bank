@@ -1555,6 +1555,9 @@ async function getGeocodeFromAddress(searchText) {
     )}.json?access_token=${MAPBOX_ACCESS_TOKEN}`
   )
     .then((response) => response.json())
-    .then((data) => data)
+    .then((data) => {
+      console.log('data', data)
+      return data; 
+    })
     .catch((error) => error);
 }
