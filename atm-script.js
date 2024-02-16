@@ -101,12 +101,14 @@ const map = new mapboxgl.Map({
   // dragPan: false,
 });
 map.on("wheel", (event) => {
-  if (event.originalEvent.ctrlKey) {
-    event.originalEvent.preventDefault();
-    if (!map.scrollZoom._enabled) map.scrollZoom.enable();
-  } else {
-    if (map.scrollZoom._enabled) map.scrollZoom.disable();
-  }
+  if(window.innerWidth > 479){
+    if (event.originalEvent.ctrlKey) {
+      event.originalEvent.preventDefault();
+      if (!map.scrollZoom._enabled) map.scrollZoom.enable();
+    } else {
+      if (map.scrollZoom._enabled) map.scrollZoom.disable();
+    }
+  }  
 });
 const geolocate = new mapboxgl.GeolocateControl({
   positionOptions: {
