@@ -100,6 +100,7 @@ const map = new mapboxgl.Map({
   doubleClickZoom: false,
   // dragPan: false,
 });
+map.scrollZoom.setWheelZoomRate(0.02);
 map.on("wheel", (event) => {
   if(window.innerWidth > 479){
     if (event.originalEvent.ctrlKey) {
