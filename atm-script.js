@@ -772,6 +772,7 @@ $('.nearby-btn').click(async function() {
           data.set("format", "json");
           data.set("key", MAPBOX_API_KEY);
           data.set("distanceUnit", "mile");
+          resObj = []
           const ATMData = await getATMData(data, GET_ATM_URL, ".simple-spinner");
           await handleResponse(ATMData);
           await handleHide(".simple-spinner");
