@@ -721,6 +721,7 @@ async function inputFilter() {
         await handleHide(".simple-spinner");
       } else {
         // await mapATMData([]);
+        await handleHide(".simple-spinner");
         await handleShow(".geocode-error");
       }
     } else {
