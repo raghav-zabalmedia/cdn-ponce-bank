@@ -678,6 +678,7 @@ document
         document.querySelector("#atmMain").style.height = "414px";
       }
       await handleHide("#atmList");
+      await handleHide(".geocode-error");
       await handleShow(".simple-spinner");
       setTimeout(async () => {
         await inputFilter();
@@ -718,8 +719,9 @@ async function inputFilter() {
         const ATMData = await getATMData(data, GET_ATM_URL, ".simple-spinner");
         await handleResponse(ATMData);
         await handleHide(".simple-spinner");
-      }else {
-        await mapATMData([]);
+      } else {
+        // await mapATMData([]);
+        await handleShow(".geocode-error");
       }
     } else {
       await mapATMData(resObj);
@@ -1572,7 +1574,6 @@ async function getGeocodeFromAddress(searchText) {
   return await fetch(url + '?' + new URLSearchParams(params))
     .then((response) => response.json())
     .then((data) => {
-      console.log('data', data)
       return data; 
     })
     .catch((error) => error);
