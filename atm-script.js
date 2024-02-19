@@ -138,18 +138,18 @@ const el = document.createElement("div");
 el.className = "my-blue-location";
 const locationMarker = new mapboxgl.Marker(el);
 
-/*geolocate.on("geolocate", (event) => {
+geolocate.on("geolocate", (event) => {
   const latitude = event.coords.latitude;
   const longitude = event.coords.longitude;
   // const latitude = 40.833251;
   // const longitude = -73.855608;
   locationMarker.setLngLat({ lon: longitude, lat: latitude }).addTo(map);
-});/*
+});
 
 $(document).ready(async function () {
   await handleShow(".simple-spinner");
   await handleFilterCount();
-  /* if (navigator.geolocation) {
+  if (navigator.geolocation) {
     await navigator.geolocation.getCurrentPosition(
       async function (position) {
         // lat = 40.833251;
@@ -186,7 +186,7 @@ $(document).ready(async function () {
         //   await handleShow(".atm_list--empty");
       }
     );
-  } else { */
+  } else {
     lat = 40.833251;
     long = -73.855608;
     geolocate.trigger();
@@ -200,7 +200,7 @@ $(document).ready(async function () {
     await handleHide(".simple-spinner");
     handleLocation()
     //   await handleShow(".atm_list--empty");
-  // }
+  }
   map.on("click", "circle", (e) => {
     map.flyTo({
       center: e.features[0].geometry.coordinates,
@@ -751,39 +751,8 @@ async function inputFilter() {
   }
   }); */
 
-$('.nearby-btn').click(async function() {
-  console.log(navigator.geolocation)
-    if (navigator.geolocation) {
-      await navigator.geolocation.getCurrentPosition(
-      
-        async function (position) {
-          console.log('position', position)
-          // lat = 40.833251;
-          // long = -73.855608;
-          lat = position.coords.latitude;
-          long = position.coords.longitude;
-          geolocate.trigger();
-          // data.set("spatialFilter", `nearby(${lat},${long},${radius})`);
-          data.set(
-            "spatialFilter",
-            `nearby(${position.coords.latitude},${position.coords.longitude},${radius})`
-          );
-          data.set("count", count);
-          data.set("format", "json");
-          data.set("key", MAPBOX_API_KEY);
-          data.set("distanceUnit", "mile");
-          resObj = []
-          const ATMData = await getATMData(data, GET_ATM_URL, ".simple-spinner");
-          await handleResponse(ATMData);
-          await handleHide(".simple-spinner");
-        },
-        async function (error) {
 
-        }
-      );
-    }
-  })
-
+  
 document
   .querySelector(".atm_filters_toggle, #close-filters")
   .addEventListener("click", async (event) => {
