@@ -138,13 +138,13 @@ const el = document.createElement("div");
 el.className = "my-blue-location";
 const locationMarker = new mapboxgl.Marker(el);
 
-geolocate.on("geolocate", (event) => {
+/*geolocate.on("geolocate", (event) => {
   const latitude = event.coords.latitude;
   const longitude = event.coords.longitude;
   // const latitude = 40.833251;
   // const longitude = -73.855608;
   locationMarker.setLngLat({ lon: longitude, lat: latitude }).addTo(map);
-});
+});/*
 
 $(document).ready(async function () {
   await handleShow(".simple-spinner");
