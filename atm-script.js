@@ -1,9 +1,10 @@
 let MAPBOX_API_KEY =
   "97bce941-0fcd-4547-b642-b0391a86e9b0a5f40b83-4852-4f00-805b-0486f6872a92";
 MAPBOX_ACCESS_TOKEN =
-  "pk.eyJ1IjoicG9uY2ViYW5rIiwiYSI6ImNsbnVkaXpvcjBhZ2kycm1maW44dDBpa2sifQ.Z64WawPBDYfTOj4NdUDIkw";
+  "pk.eyJ1IjoiemFiYWxkZXYiLCJhIjoiY2xhbWR5ZTVvMGU2ZTN4bGJnMTBxMTJqZSJ9.-q-ULtt6xhcCAZY9kw9bzQ";
 mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
-
+// mapboxgl.accessToken =
+//   "pk.eyJ1IjoicG9uY2ViYW5rIiwiYSI6ImNsbnVkaXpvcjBhZ2kycm1maW44dDBpa2sifQ.Z64WawPBDYfTOj4NdUDIkw";
 let excelUrl =
   "https://uploads-ssl.webflow.com/63500fd89166a09e3c3efaf0/65ceecaab37c24df88429b9b_Citibank_BranchList.csv";
 
@@ -143,6 +144,9 @@ geolocate.on("geolocate", (event) => {
   const longitude = event.coords.longitude;
   // const latitude = 40.833251;
   // const longitude = -73.855608;
+  // const latitude = 36.778259;
+  // const longitude = -119.417931;
+
   locationMarker.setLngLat({ lon: longitude, lat: latitude }).addTo(map);
 });
 
@@ -152,23 +156,43 @@ $(document).ready(async function () {
   if (navigator.geolocation) {
     await navigator.geolocation.getCurrentPosition(
       async function (position) {
-        // lat = 40.833251;
-        // long = -73.855608;
+       
         lat = position.coords.latitude;
         long = position.coords.longitude;
-        geolocate.trigger();
-        // data.set("spatialFilter", `nearby(${lat},${long},${radius})`);
-        data.set(
-          "spatialFilter",
-          `nearby(${position.coords.latitude},${position.coords.longitude},${radius})`
-        );
-        data.set("count", count);
-        data.set("format", "json");
-        data.set("key", MAPBOX_API_KEY);
-        data.set("distanceUnit", "mile");
-        const ATMData = await getATMData(data, GET_ATM_URL, ".simple-spinner");
-        await handleResponse(ATMData);
-        await handleHide(".simple-spinner");
+        // console.log(lat, long)
+        // lat = 36.778259;
+        // long = -119.417931;
+
+        getGeocodeFromAddress(`${long},${lat}`).then(async function(searchGeocode) {
+          var isUSLocation = false;
+          if(searchGeocode.features !== null && searchGeocode.features[0] !== undefined) {
+            // $(".location-near-value").text(searchGeocode.features[0].place_name);
+              searchGeocode.features[0].context.forEach(function(val) {
+                if(val.id.includes('country.') && val.short_code == 'us') {
+                  isUSLocation = true;
+                }
+              });
+
+              if(isUSLocation) {
+                geolocate.trigger();
+                
+                data.set(
+                  "spatialFilter",
+                  `nearby(${lat},${long},${radius})`
+                );
+                data.set("count", count);
+                data.set("format", "json");
+                data.set("key", MAPBOX_API_KEY);
+                data.set("distanceUnit", "mile");
+                const ATMData = await getATMData(data, GET_ATM_URL, ".simple-spinner");
+                await handleResponse(ATMData);
+                await handleHide(".simple-spinner");
+              } else {
+                await handleHide(".simple-spinner");
+                await handleShow(".outsideusa-error");
+              }
+          }
+        })
       },
       async function (error) {
         lat = 40.833251;
@@ -684,6 +708,7 @@ document
       await handleHide("#atmList");
       await handleHide(".geocode-error");
       await handleShow(".simple-spinner");
+      await clearMarkers();
       setTimeout(async () => {
         await inputFilter();
         await handleLocation();
@@ -706,11 +731,12 @@ async function inputFilter() {
     //     obj.atmLocation.address.postalCode.toLowerCase().includes(searchVal)
     // );
     // await mapATMData(searchObj);
-    var searchGeocode = await getGeocodeFromAddress(searchVal);
+    var searchGeocode = await getGeocodeFromAddress(searchVal,'US');
     if (
       searchGeocode.features !== undefined &&
       searchGeocode.features.length > 0
     ) {
+      // $(".location-near-value").text(searchGeocode.features[0].place_name)
       data.set(
         "spatialFilter",
         `nearby(${searchGeocode.features[0].center[1]},${searchGeocode.features[0].center[0]},${radius})`
@@ -1566,14 +1592,18 @@ async function handleLocation() {
   }
 }
 
-async function getGeocodeFromAddress(searchText) {
+async function getGeocodeFromAddress(searchText, country) {
   const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${searchText}.json`;
   const params = {
     access_token: MAPBOX_ACCESS_TOKEN,
     types: "postcode,place",
     //bbox: '-125.0,24.396308,-66.93457,49.384358'
-    country: "US",
+    // country: "US",
   };
+
+  if(country) {
+    params.country = country;
+  }
 
   return await fetch(url + "?" + new URLSearchParams(params))
     .then((response) => response.json())
@@ -1581,4 +1611,20 @@ async function getGeocodeFromAddress(searchText) {
       return data;
     })
     .catch((error) => error);
+}
+
+function detectMob() {
+  const toMatch = [
+      /Android/i,
+      /webOS/i,
+      /iPhone/i,
+      /iPad/i,
+      /iPod/i,
+      /BlackBerry/i,
+      /Windows Phone/i
+  ];
+  
+  return toMatch.some((toMatchItem) => {
+      return navigator.userAgent.match(toMatchItem);
+  });
 }
