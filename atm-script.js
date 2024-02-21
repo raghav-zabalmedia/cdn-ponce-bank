@@ -150,13 +150,11 @@ geolocate.on("geolocate", (event) => {
   locationMarker.setLngLat({ lon: longitude, lat: latitude }).addTo(map);
 });
 
-$(document).ready(async function () {
-  await handleShow(".simple-spinner");
-  await handleFilterCount();
+async function init() {
   if (navigator.geolocation) {
     await navigator.geolocation.getCurrentPosition(
       async function (position) {
-       
+      
         lat = position.coords.latitude;
         long = position.coords.longitude;
         // console.log(lat, long)
@@ -225,6 +223,13 @@ $(document).ready(async function () {
     handleLocation();
     //   await handleShow(".atm_list--empty");
   }
+}
+
+$(document).ready(async function () {
+  await handleShow(".simple-spinner");
+  init()
+  await handleFilterCount();
+ 
   map.on("click", "circle", (e) => {
     map.flyTo({
       center: e.features[0].geometry.coordinates,
@@ -757,7 +762,8 @@ async function inputFilter() {
       await handleMapReset();
     }
   } else {
-    await mapATMData(resObj);
+    await clearMarkers();
+    init()
   }
 }
 /* document
