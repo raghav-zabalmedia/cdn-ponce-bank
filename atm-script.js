@@ -102,14 +102,14 @@ const map = new mapboxgl.Map({
 });
 map.scrollZoom.setWheelZoomRate(0.02);
 map.on("wheel", (event) => {
-  if(window.innerWidth > 479){
+  if (window.innerWidth > 479) {
     if (event.originalEvent.ctrlKey) {
       event.originalEvent.preventDefault();
       if (!map.scrollZoom._enabled) map.scrollZoom.enable();
     } else {
       if (map.scrollZoom._enabled) map.scrollZoom.disable();
     }
-  }  
+  }
 });
 const geolocate = new mapboxgl.GeolocateControl({
   positionOptions: {
@@ -198,7 +198,7 @@ $(document).ready(async function () {
     const ATMData = await getATMData(data, GET_ATM_URL, ".simple-spinner");
     await handleResponse(ATMData);
     await handleHide(".simple-spinner");
-    handleLocation()
+    handleLocation();
     //   await handleShow(".atm_list--empty");
   }
   map.on("click", "circle", (e) => {
@@ -478,6 +478,7 @@ async function handleResponse(response) {
       ).toFixed(2);
     }
   } else {
+    resObj = response.results;
     max = radius;
   }
 
@@ -550,8 +551,11 @@ async function mapATMData(resObject) {
     await handleShow("#atmList");
     await handleHide(".atm_list--empty");
   } else {
-    await handleHide("#atmList");
-    await handleShow(".atm_list--empty");
+    if (document.querySelector(".geocode-error").style.display !== "block") {
+      await handleShow(".atm_list--empty");
+    } else {
+      await handleHide(".atm_list--empty");
+    }
   }
   await handleHide(".simple-spinner");
   await handleHide(".bottom-spinner");
@@ -695,37 +699,36 @@ document
 
 async function inputFilter() {
   searchVal = document.querySelector(".atm_search-field").value.toLowerCase();
-  if (resObj.length > 0) {
-    if (searchVal && searchVal.length > 0) {
-      // var searchObj = resObj.filter(
-      //   (obj) =>
-      //     obj.atmLocation.address.city.toLowerCase().includes(searchVal) ||
-      //     obj.atmLocation.address.postalCode.toLowerCase().includes(searchVal)
-      // );
-      // await mapATMData(searchObj);
-
-      console.log("searchVal", searchVal);
-      var searchGeocode = await getGeocodeFromAddress(searchVal);
-      if(searchGeocode.features !== undefined && searchGeocode.features.length > 0) {
-        data.set(
-          "spatialFilter",
-          `nearby(${searchGeocode.features[0].center[1]},${searchGeocode.features[0].center[0]},${radius})`
-        );
-        data.set("count", count);
-        data.set("format", "json");
-        data.set("key", MAPBOX_API_KEY);
-        data.set("distanceUnit", "mile");
-        resObj = []
-        const ATMData = await getATMData(data, GET_ATM_URL, ".simple-spinner");
-        await handleResponse(ATMData);
-        await handleHide(".simple-spinner");
-      } else {
-        // await mapATMData([]);
-        await handleHide(".simple-spinner");
-        await handleShow(".geocode-error");
-      }
+  if (searchVal && searchVal.length > 0) {
+    // var searchObj = resObj.filter(
+    //   (obj) =>
+    //     obj.atmLocation.address.city.toLowerCase().includes(searchVal) ||
+    //     obj.atmLocation.address.postalCode.toLowerCase().includes(searchVal)
+    // );
+    // await mapATMData(searchObj);
+    var searchGeocode = await getGeocodeFromAddress(searchVal);
+    if (
+      searchGeocode.features !== undefined &&
+      searchGeocode.features.length > 0
+    ) {
+      data.set(
+        "spatialFilter",
+        `nearby(${searchGeocode.features[0].center[1]},${searchGeocode.features[0].center[0]},${radius})`
+      );
+      data.set("count", count);
+      data.set("format", "json");
+      data.set("key", MAPBOX_API_KEY);
+      data.set("distanceUnit", "mile");
+      resObj = [];
+      const ATMData = await getATMData(data, GET_ATM_URL, ".simple-spinner");
+      await handleResponse(ATMData);
+      await handleHide(".simple-spinner");
     } else {
-      await mapATMData(resObj);
+      await handleHide(".simple-spinner");
+      await handleShow(".geocode-error");
+      await mapATMData([]);
+      await clearMarkers();
+      await handleMapReset();
     }
   } else {
     await mapATMData(resObj);
@@ -751,8 +754,6 @@ async function inputFilter() {
   }
   }); */
 
-
-  
 document
   .querySelector(".atm_filters_toggle, #close-filters")
   .addEventListener("click", async (event) => {
@@ -1541,7 +1542,7 @@ function capitalizeWords(input) {
 
 async function handleLocation() {
   const atmLocationData = document.querySelector("#atmList .atm_item");
-  console.log('atmLocationData', atmLocationData)
+  console.log("atmLocationData", atmLocationData);
   if (atmLocationData) {
     if (window.innerWidth < 479) {
       map.flyTo({
@@ -1567,17 +1568,17 @@ async function handleLocation() {
 
 async function getGeocodeFromAddress(searchText) {
   const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${searchText}.json`;
-    const params = {
-        access_token: MAPBOX_ACCESS_TOKEN,
-        types: 'postcode,place',
-        //bbox: '-125.0,24.396308,-66.93457,49.384358'
-        country: "US"
-    };
+  const params = {
+    access_token: MAPBOX_ACCESS_TOKEN,
+    types: "postcode,place",
+    //bbox: '-125.0,24.396308,-66.93457,49.384358'
+    country: "US",
+  };
 
-  return await fetch(url + '?' + new URLSearchParams(params))
+  return await fetch(url + "?" + new URLSearchParams(params))
     .then((response) => response.json())
     .then((data) => {
-      return data; 
+      return data;
     })
     .catch((error) => error);
 }
