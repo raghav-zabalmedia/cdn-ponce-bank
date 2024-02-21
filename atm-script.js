@@ -99,9 +99,9 @@ const map = new mapboxgl.Map({
   scrollZoom: false,
   boxZoom: false,
   doubleClickZoom: false,
-  // dragPan: false,
+  cooperativeGestures: true,
 });
-map.scrollZoom.setWheelZoomRate(0.02);
+/*map.scrollZoom.setWheelZoomRate(0.02);
 map.on("wheel", (event) => {
   if (window.innerWidth > 479) {
     if (event.originalEvent.ctrlKey) {
@@ -111,7 +111,7 @@ map.on("wheel", (event) => {
       if (map.scrollZoom._enabled) map.scrollZoom.disable();
     }
   }
-});
+});*/
 const geolocate = new mapboxgl.GeolocateControl({
   positionOptions: {
     enableHighAccuracy: true,
