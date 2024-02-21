@@ -965,10 +965,10 @@ async function handleLanguageFilter(languages) {
 
 async function handleFilterCount() {
   if (filterCount > 0) {
-    await handleShow(".filter-number-wr");
+    $(".filter-number-wr").removeClass('hide');
     document.querySelector(".filter_number").innerText = filterCount;
   } else {
-    await handleHide(".filter-number-wr");
+    $(".filter-number-wr").addClass('hide');
   }
 }
 
