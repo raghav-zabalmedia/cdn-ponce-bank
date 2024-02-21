@@ -980,7 +980,7 @@ async function handleHide(element) {
 
 async function handleShow(element) {
   let elementDiv = document.querySelector(element);
-  elementDiv.style.display = element == ".filter-number-wr" ? "" : "block";
+  elementDiv.style.display = "block";
   return true;
 }
 
