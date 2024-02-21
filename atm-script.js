@@ -714,6 +714,7 @@ document
       await handleHide("#atmList");
       await handleHide(".geocode-error");
       await handleShow(".simple-spinner");
+      await handleHide(".outsideusa-error");
       await clearMarkers();
       setTimeout(async () => {
         await inputFilter();
