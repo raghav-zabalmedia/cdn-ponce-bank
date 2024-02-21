@@ -188,6 +188,7 @@ async function init() {
               } else {
                 await handleHide(".simple-spinner");
                 await handleShow(".outsideusa-error");
+                await handleHide(".geocode-error");
               }
           }
         })
@@ -757,6 +758,7 @@ async function inputFilter() {
     } else {
       await handleHide(".simple-spinner");
       await handleShow(".geocode-error");
+      await handleHide(".outsideusa-error");
       await mapATMData([]);
       await clearMarkers();
       await handleMapReset();
@@ -980,7 +982,7 @@ async function handleHide(element) {
 
 async function handleShow(element) {
   let elementDiv = document.querySelector(element);
-  elementDiv.style.display = "block";
+  elementDiv.style.display = element == ".filter-number-wr" ? "" : "block";
   return true;
 }
 
@@ -1634,3 +1636,4 @@ function detectMob() {
       return navigator.userAgent.match(toMatchItem);
   });
 }
+
