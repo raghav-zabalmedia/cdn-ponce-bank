@@ -1,7 +1,7 @@
 let MAPBOX_API_KEY =
   "97bce941-0fcd-4547-b642-b0391a86e9b0a5f40b83-4852-4f00-805b-0486f6872a92";
 MAPBOX_ACCESS_TOKEN =
-  "pk.eyJ1IjoiemFiYWxkZXYiLCJhIjoiY2xhbWR5ZTVvMGU2ZTN4bGJnMTBxMTJqZSJ9.-q-ULtt6xhcCAZY9kw9bzQ";
+  "pk.eyJ1IjoicG9uY2ViYW5rIiwiYSI6ImNsbnVkaXpvcjBhZ2kycm1maW44dDBpa2sifQ.Z64WawPBDYfTOj4NdUDIkw";
 mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
 // mapboxgl.accessToken =
 //   "pk.eyJ1IjoicG9uY2ViYW5rIiwiYSI6ImNsbnVkaXpvcjBhZ2kycm1maW44dDBpa2sifQ.Z64WawPBDYfTOj4NdUDIkw";
