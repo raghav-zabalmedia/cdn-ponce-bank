@@ -192,7 +192,6 @@ async function init() {
               );
             });
             totalFound = 0;
-            count = 100;
             csvStartPosition = 0;
             csvEndPosition = 4;
             csvData = [];
@@ -904,7 +903,6 @@ async function handleClearFilter() {
     ele.previousElementSibling.classList.remove("w--redirected-checked");
   });
   totalFound = 0;
-  count = 100;
   csvStartPosition = 0;
   csvEndPosition = 4;
   csvData = [];
