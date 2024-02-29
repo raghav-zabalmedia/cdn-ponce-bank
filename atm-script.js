@@ -382,6 +382,13 @@ async function getCSVData() {
           parsedData.findIndex((s) => a.atmLocation.id === s.atmLocation.id) ===
             i
       );
+      if (searchVal) {
+        parsedData = parsedData.filter(
+          (obj) =>
+            obj.atmLocation.address.city.toLowerCase().includes(searchVal) ||
+            obj.atmLocation.address.postalCode.toLowerCase().includes(searchVal)
+        );
+      }
       await Promise.all(parsedData.map((csvSlice) => resObj.push(csvSlice)));
     }
   }
@@ -526,14 +533,7 @@ async function handleResponse(response) {
 
   if (excelUrl) {
     await getCSVData();
-  }
-  if (searchVal) {
-    resObj = resObj.filter(
-      (obj) =>
-        obj.atmLocation.address.city.toLowerCase().includes(searchVal) ||
-        obj.atmLocation.address.postalCode.toLowerCase().includes(searchVal)
-    );
-  }
+  }  
   if (languages.length > 0) {
     resObj = resObj.filter((obj) =>
       languages.includes(obj.atmLocation.languageType.toLowerCase())
@@ -760,6 +760,7 @@ async function inputFilter() {
       searchGeocode.features !== undefined &&
       searchGeocode.features.length > 0
     ) {
+      resObj = [];
       data.set(
         "spatialFilter",
         `nearby(${searchGeocode.features[0].center[1]},${searchGeocode.features[0].center[0]},${radius})`
