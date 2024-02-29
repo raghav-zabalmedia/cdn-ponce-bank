@@ -780,6 +780,7 @@ async function inputFilter() {
       await handleMapReset();
     }
   } else {
+    resObj = [];
     init();
   }
 }
@@ -870,6 +871,7 @@ document
     if (document.querySelector(".atm_search-field").value) {
       await inputFilter();
     } else {
+      resObj = [];
       await init();
     }
     let element = document.querySelector(".main-wrapper");
