@@ -134,9 +134,12 @@ map.addControl(
     showCompass: false,
     showZoom: showZoom,
   }),
-  "bottom-right"
+  window.innerWidth < 479 ? "bottom-right" : "top-right"
 );
-map.addControl(geolocate, "bottom-right");
+map.addControl(
+  geolocate,
+  window.innerWidth < 479 ? "bottom-right" : "top-right"
+);
 
 const el = document.createElement("div");
 el.className = "my-blue-location";
@@ -455,11 +458,11 @@ async function csvParser(csvData) {
         csvImportCloneObj.atmLocation.address.street
           ? capitalizeWords(csvImportCloneObj.atmLocation.address.street)
           : ""
-      } , ${
+      }, ${
         csvImportCloneObj.atmLocation.address.city
           ? capitalizeWords(csvImportCloneObj.atmLocation.address.city)
           : ""
-      } , ${
+      }, ${
         csvImportCloneObj.atmLocation.address.state
           ? csvImportCloneObj.atmLocation.address.state.toUpperCase()
           : ""
@@ -533,7 +536,7 @@ async function handleResponse(response) {
 
   if (excelUrl) {
     await getCSVData();
-  }  
+  }
   if (languages.length > 0) {
     resObj = resObj.filter((obj) =>
       languages.includes(obj.atmLocation.languageType.toLowerCase())
@@ -586,11 +589,11 @@ async function mapATMData(resObject) {
           obj.atmLocation.address.street
             ? capitalizeWords(obj.atmLocation.address.street)
             : ""
-        } , ${
+        }, ${
           obj.atmLocation.address.city
             ? capitalizeWords(obj.atmLocation.address.city)
             : ""
-        } , ${
+        }, ${
           obj.atmLocation.address.state
             ? obj.atmLocation.address.state.toUpperCase()
             : ""
@@ -1004,11 +1007,11 @@ async function handleMapData(resObject) {
           obj.atmLocation.address.street
             ? capitalizeWords(obj.atmLocation.address.street)
             : ""
-        } , ${
+        }, ${
           obj.atmLocation.address.city
             ? capitalizeWords(obj.atmLocation.address.city)
             : ""
-        } , ${
+        }, ${
           obj.atmLocation.address.state
             ? obj.atmLocation.address.state.toUpperCase()
             : ""
